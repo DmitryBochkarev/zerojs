@@ -1,0 +1,16 @@
+{
+  "name": "zerojs",
+  "description": "Zero",
+  "version": "0.0.0",
+  "scripts": {
+    "test": "mocha-phantomjs -R dot test/runner.html"
+  },
+  "dependencies": {
+
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "chai": "*",
+    "grunt-exec": "*"
+  }
+}
