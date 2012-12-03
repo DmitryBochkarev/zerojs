@@ -173,10 +173,10 @@ Zero.Computed = (function() {
     self.emit('get');
 
     if (self.shouldRecompute) {
-      self.emit('start compute')
+      self.emit('start compute');
       newValue = self.fn.call(context);
       self.shouldRecompute = false;
-      self.emit('end compute')
+      self.emit('end compute');
 
       if (oldValue !== newValue) {
         self.value = newValue;
@@ -264,7 +264,7 @@ Zero.Isolation = (function() {
     });
     
     function _computed() {
-
+      return computed.get(this);
     }
 
     return _computed;

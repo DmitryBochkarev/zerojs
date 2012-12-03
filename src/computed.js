@@ -1,14 +1,14 @@
-Zero.Computed = (function() {
+Zero.Computed = (function(undefined) {
   var EventEmitter = Zero.EventEmitter;
 
-  function Computed(computeFn) {
+  function Computed(readComputeFn) {
     var self = this;
 
     EventEmitter.call(self);
 
-    self.uudi = Zero.uuid();
-    self.fn = computeFn;
-    self.value = null;
+    self.uuid = Zero.uuid();
+    self.read = readComputeFn;
+    self.value = undefined;
     self.shouldRecompute = true;
   }
 
@@ -22,19 +22,20 @@ Zero.Computed = (function() {
     self.emit('get');
 
     if (self.shouldRecompute) {
-      self.emit('start compute');
-      newValue = self.fn.call(context);
+      self.emit('start');
+      newValue = self.read.call(context);
       self.shouldRecompute = false;
-      self.emit('end compute');
 
       if (oldValue !== newValue) {
         self.value = newValue;
         self.emit('change', newValue, oldValue);
       }
+
+      self.emit('end');
     }
 
     return self.value;
   };
 
   return Computed;
-})();
+})(undefined);

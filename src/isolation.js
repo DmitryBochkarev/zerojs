@@ -63,12 +63,12 @@ Zero.Isolation = (function() {
       isolation.emit('write:computed', uuid);
     });
 
-    computed.on('start compute', function() {
-      isolation.emit('start compute', uuid);
+    computed.on('start', function() {
+      isolation.emit('start:compute', uuid);
     });
 
-    computed.on('end compute', function() {
-      isolation.emit('end compute', uuid);
+    computed.on('end', function() {
+      isolation.emit('end:compute', uuid);
     });
     
     function _computed() {

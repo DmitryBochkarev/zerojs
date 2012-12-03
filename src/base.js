@@ -1,5 +1,7 @@
 Zero = {};
 
+Zero.noop = function(val) { return val; };
+
 Zero.uuid = (function() {
   var i = 1;
 

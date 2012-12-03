@@ -6,7 +6,6 @@ describe('Zero.Observable', function() {
   });
 
   afterEach(function() {
-    observable.off();
     observable = null;
   });
   
@@ -14,7 +13,13 @@ describe('Zero.Observable', function() {
     expect(observable).to.be.an.instanceof(Zero.EventEmitter);
   });
 
-  it('should set value', function() {
+  it('should have unique uuid', function() {
+    var observable2 = new Zero.Observable();
+
+    expect(observable.uuid).to.not.be.equal(observable2.uuid);
+  });
+
+  it('should save value', function() {
     var value = 1;
 
     observable.set(value);
@@ -31,9 +36,8 @@ describe('Zero.Observable', function() {
 
     observable.set(1);
     observable.set(1);
-    observable.set(1);
 
-    expect(a).to.be.equal(3);
+    expect(a).to.be.equal(2);
   });
 
   it('should emit event on change', function() {
@@ -43,7 +47,6 @@ describe('Zero.Observable', function() {
       a++;
     });
 
-    observable.set(1);
     observable.set(1);
     observable.set(1);
 
@@ -59,8 +62,7 @@ describe('Zero.Observable', function() {
 
     observable.get();
     observable.get();
-    observable.get();
 
-    expect(a).to.be.equal(3);
+    expect(a).to.be.equal(2);
   });
 });

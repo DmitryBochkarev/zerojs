@@ -6,7 +6,6 @@ describe('Isolation', function() {
   });
 
   afterEach(function() {
-    isolation.off();
     isolation = null;
   });
 
@@ -41,6 +40,43 @@ describe('Isolation', function() {
       };
 
       expect(ctx.observable(2).a).to.be.equal(3);
+      expect(ctx.observable(2).a).to.be.equal(3);
     });
-  });
+
+    it('isolation should emit event `read:observable` on get', function() {
+      var observableInstance = new Zero.Observable();
+      var a = 0;
+
+      var observable = isolation.registerObservable(observableInstance);
+
+      isolation.on('read:observable', function(uuid) {
+        expect(observableInstance.uuid).to.be.equal(uuid);
+        a++;
+      });
+
+      observable();
+
+      expect(a).to.be.equal(1);
+    });
+
+    it('isolation should emit event `write:observable` only on change', function() {
+      var observableInstance = new Zero.Observable();
+      var a = 0;
+
+      var observable = isolation.registerObservable(observableInstance);
+
+      isolation.on('write:observable', function(uuid) {
+        expect(observableInstance.uuid).to.be.equal(uuid);
+        a++;
+      });
+
+      observable(1);
+      observable(1);
+
+      expect(a).to.be.equal(1);
+    });
+  }); // observable
+
+  describe('computed', function() {
+  }); // computed
 });

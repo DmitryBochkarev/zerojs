@@ -17,6 +17,15 @@ describe('Zero', function() {
 });
 
 describe('Helpers', function() {
+  describe('noop', function() {
+    it('should return passing value', function() {
+      var a = 1;
+      var b = Zero.noop(a);
+
+      expect(b).to.be.equal(a);
+    });
+  });
+
   describe('uuid', function() {
     it('present', function() {
       expect(Zero.uuid).to.not.be.undefined;
@@ -26,8 +35,8 @@ describe('Helpers', function() {
       var a = Zero.uuid();
       var b = Zero.uuid();
 
-      expect(a).to.not.be.null;
-      expect(b).to.not.be.null;
+      expect(a).to.not.be.undefined;
+      expect(b).to.not.be.undefined;
       expect(a).to.not.equal(b);
     });
   });
