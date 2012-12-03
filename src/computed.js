@@ -1,4 +1,4 @@
-Zero.Computed = (function(undefined) {
+Zero.Computed = (function() {
   var EventEmitter = Zero.EventEmitter;
 
   function Computed(readComputeFn) {
@@ -38,4 +38,4 @@ Zero.Computed = (function(undefined) {
   };
 
   return Computed;
-})(undefined);
+})();

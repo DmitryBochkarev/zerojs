@@ -11,6 +11,8 @@ module.exports = function(grunt) {
           'src/event_emitter.js',
           'src/observable.js',
           'src/computed.js',
+          'src/subscriber.js',
+          'src/isolation_call_context.js',
           'src/isolation.js'
         ],
         dest: 'dist/zero.js'

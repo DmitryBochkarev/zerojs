@@ -128,4 +128,12 @@ describe('EventEmitter', function() {
     expect(resA).to.be.equal(4);
     expect(resB).to.be.equal(5);
   });
+
+  it('should run handler in instance context', function() {
+    eventEmitter.on('test', function() {
+      expect(this).to.be.equal(eventEmitter);
+    });
+
+    eventEmitter.emit('test');
+  });
 });

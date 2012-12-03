@@ -2,13 +2,69 @@ Zero.Isolation = (function() {
   var EventEmitter = Zero.EventEmitter;
 
   function Isolation() {
-    EventEmitter.call(this);
+    var self = this;
+    EventEmitter.call(self);
 
-    this.observables = {};
-    this.computed = {};
+    self.observables = {};
+    self.computed = {};
+    self.subscribers = {};
+    self.callStack = [];
+    self.currentContext = undefined;
+    self.dependencies = {};
+
+    self.on('read:observable', function(uuid) {
+      self.registerDependency(uuid);
+    });
+
+    self.on('read:computed', function(uuid) {
+      self.registerDependency(uuid);
+    });
+
+    self.on('start:computed', function() {
+      self.setContext(uuid);
+    });
+
+    self.on('end:computed', function(uuid) {
+      self.closeContext();
+    });
+
+    self.on('start:subscriber', function(uuid) {
+      self.setContext(uuid);
+    });
+
+    self.on('end:subscriber', function() {
+      self.closeContext();
+    });
   }
 
   var prototype = Isolation.prototype = new EventEmitter();
+
+  prototype.registerDependency = function(uuid) {
+    if (this.currentContext) {
+      /*#DEBUG*/
+      if (this.currentContext.uuid == uuid) {
+        throw new Error('Recoursive call');
+      }
+      /*/DEBUG*/
+      this.currentContext.dependencies.push(uuid);
+    }
+  };
+
+  prototype.setContext = function(uuid) {
+    if (this.currentContext) {
+      this.callStack.unshift(this.currentContext);
+    }
+
+    this.currentContext = new Zero.IsolationCallContext(uuid);
+  };
+
+  prototype.closeContext = function() {
+    var self = this;
+    
+    self.dependencies[self.currentContext.uuid] = self.currentContext.dependencies;
+
+    self.currentContext = self.callStack.shift();
+  };
 
   prototype.observable = function(initialValue) {
     var observable = new Zero.Observable(initialValue);
@@ -76,6 +132,33 @@ Zero.Isolation = (function() {
     }
 
     return _computed;
+  };
+
+  prototype.subscribe = function(subscribeFn) {
+    var subscriber = new Zero.Subscriber();
+
+    return this.registerSubscriber(subscriber);
+  };
+
+  prototype.registerSubscriber = function(subscriber) {
+    var isolation = this;
+    var uuid = subscriber.uuid;
+
+    isolation.subscribers[uuid] = subscriber;
+
+    subscriber.on('start', function() {
+      isolation.emit('start:subscriber', uuid);
+    });
+
+    subscriber.on('end', function() {
+      isolation.emit('end:subscriber', uuid);
+    });
+
+    function _subscriber() {
+      return subscriber.run(this);
+    }
+    
+    return _subscriber;
   };
 
   return Isolation;
