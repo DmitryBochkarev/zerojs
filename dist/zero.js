@@ -1,5 +1,7 @@
 Zero = {};
 
+Zero.noop = function(val) { return val; };
+
 Zero.uuid = (function() {
   var i = 1;
 
@@ -152,14 +154,14 @@ Zero.Observable = (function() {
 Zero.Computed = (function() {
   var EventEmitter = Zero.EventEmitter;
 
-  function Computed(computeFn) {
+  function Computed(readComputeFn) {
     var self = this;
 
     EventEmitter.call(self);
 
-    self.uudi = Zero.uuid();
-    self.fn = computeFn;
-    self.value = null;
+    self.uuid = Zero.uuid();
+    self.read = readComputeFn;
+    self.value = undefined;
     self.shouldRecompute = true;
   }
 
@@ -173,15 +175,16 @@ Zero.Computed = (function() {
     self.emit('get');
 
     if (self.shouldRecompute) {
-      self.emit('start compute');
-      newValue = self.fn.call(context);
+      self.emit('start');
+      newValue = self.read.call(context);
       self.shouldRecompute = false;
-      self.emit('end compute');
 
       if (oldValue !== newValue) {
         self.value = newValue;
         self.emit('change', newValue, oldValue);
       }
+
+      self.emit('end');
     }
 
     return self.value;
@@ -190,17 +193,99 @@ Zero.Computed = (function() {
   return Computed;
 })();
 
+Zero.Subscriber = (function() {
+  var EventEmitter = Zero.EventEmitter;
+  function Subscriber(fn) {
+    EventEmitter.call(this);
+
+    this.uuid = Zero.uuid();
+    this.fn = fn;
+  }
+
+  var prototype = Subscriber.prototype = new EventEmitter();
+
+  prototype.run = function(context) {
+    this.emit('start');
+    this.fn.call(context);
+    this.emit('end');
+
+    return context;
+  };
+
+  return Subscriber;
+})();
+
+Zero.IsolationCallContext = (function() {
+  function IsolationCallContext(uuid) {
+    this.uuid = uuid;
+    this.dependencies = [];
+  }
+
+  return IsolationCallContext;
+})();
+
 Zero.Isolation = (function() {
   var EventEmitter = Zero.EventEmitter;
 
   function Isolation() {
-    EventEmitter.call(this);
+    var self = this;
+    EventEmitter.call(self);
 
-    this.observables = {};
-    this.computed = {};
+    self.observables = {};
+    self.computed = {};
+    self.subscribers = {};
+    self.callStack = [];
+    self.currentContext = undefined;
+    self.dependencies = {};
+
+    self.on('read:observable', registerDependency);
+    self.on('read:computed', registerDependency);
+    self.on('start:computed', setContext);
+    self.on('end:computed', closeContext);
+    self.on('start:subscriber', setContext);
+    self.on('end:subscriber', closeContext);
+
+    function registerDependency(uuid) {
+      self.registerDependency(uuid);
+    }
+
+    function setContext(uuid) {
+      self.setContext(uuid);
+    }
+
+    function closeContext(uuid) {
+      self.closeContext();
+    }
   }
 
   var prototype = Isolation.prototype = new EventEmitter();
+
+  prototype.registerDependency = function(uuid) {
+    if (this.currentContext) {
+      /*#DEBUG*/
+      if (this.currentContext.uuid == uuid) {
+        throw new Error('Recoursive call');
+      }
+      /*/DEBUG*/
+      this.currentContext.dependencies.push(uuid);
+    }
+  };
+
+  prototype.setContext = function(uuid) {
+    if (this.currentContext) {
+      this.callStack.unshift(this.currentContext);
+    }
+
+    this.currentContext = new Zero.IsolationCallContext(uuid);
+  };
+
+  prototype.closeContext = function() {
+    var self = this;
+    
+    self.dependencies[self.currentContext.uuid] = self.currentContext.dependencies;
+
+    self.currentContext = self.callStack.shift();
+  };
 
   prototype.observable = function(initialValue) {
     var observable = new Zero.Observable(initialValue);
@@ -255,12 +340,12 @@ Zero.Isolation = (function() {
       isolation.emit('write:computed', uuid);
     });
 
-    computed.on('start compute', function() {
-      isolation.emit('start compute', uuid);
+    computed.on('start', function() {
+      isolation.emit('start:compute', uuid);
     });
 
-    computed.on('end compute', function() {
-      isolation.emit('end compute', uuid);
+    computed.on('end', function() {
+      isolation.emit('end:compute', uuid);
     });
     
     function _computed() {
@@ -268,6 +353,33 @@ Zero.Isolation = (function() {
     }
 
     return _computed;
+  };
+
+  prototype.subscribe = function(subscribeFn) {
+    var subscriber = new Zero.Subscriber();
+
+    return this.registerSubscriber(subscriber);
+  };
+
+  prototype.registerSubscriber = function(subscriber) {
+    var isolation = this;
+    var uuid = subscriber.uuid;
+
+    isolation.subscribers[uuid] = subscriber;
+
+    subscriber.on('start', function() {
+      isolation.emit('start:subscriber', uuid);
+    });
+
+    subscriber.on('end', function() {
+      isolation.emit('end:subscriber', uuid);
+    });
+
+    function _subscriber() {
+      return subscriber.run(this);
+    }
+    
+    return _subscriber;
   };
 
   return Isolation;

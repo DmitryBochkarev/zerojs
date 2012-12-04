@@ -12,29 +12,24 @@ Zero.Isolation = (function() {
     self.currentContext = undefined;
     self.dependencies = {};
 
-    self.on('read:observable', function(uuid) {
+    self.on('read:observable', registerDependency);
+    self.on('read:computed', registerDependency);
+    self.on('start:computed', setContext);
+    self.on('end:computed', closeContext);
+    self.on('start:subscriber', setContext);
+    self.on('end:subscriber', closeContext);
+
+    function registerDependency(uuid) {
       self.registerDependency(uuid);
-    });
+    }
 
-    self.on('read:computed', function(uuid) {
-      self.registerDependency(uuid);
-    });
-
-    self.on('start:computed', function() {
+    function setContext(uuid) {
       self.setContext(uuid);
-    });
+    }
 
-    self.on('end:computed', function(uuid) {
+    function closeContext(uuid) {
       self.closeContext();
-    });
-
-    self.on('start:subscriber', function(uuid) {
-      self.setContext(uuid);
-    });
-
-    self.on('end:subscriber', function() {
-      self.closeContext();
-    });
+    }
   }
 
   var prototype = Isolation.prototype = new EventEmitter();
@@ -51,11 +46,13 @@ Zero.Isolation = (function() {
   };
 
   prototype.setContext = function(uuid) {
-    if (this.currentContext) {
-      this.callStack.unshift(this.currentContext);
+    var self = this;
+
+    if (self.currentContext) {
+      self.callStack.unshift(self.currentContext);
     }
 
-    this.currentContext = new Zero.IsolationCallContext(uuid);
+    self.currentContext = new Zero.IsolationCallContext(uuid);
   };
 
   prototype.closeContext = function() {
