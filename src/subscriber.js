@@ -10,7 +10,7 @@ Zero.Subscriber = (function() {
     self.lastContext = undefined;
   }
 
-  var prototype = Subscriber.prototype = new EventEmitter();
+  var prototype = Subscriber.prototype = Object.create(EventEmitter.prototype);
 
   prototype.run = function(context) {
     var self = this;

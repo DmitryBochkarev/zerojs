@@ -32,7 +32,7 @@ Zero.Isolation = (function() {
     }
   }
 
-  var prototype = Isolation.prototype = new EventEmitter();
+  var prototype = Isolation.prototype = Object.create(EventEmitter.prototype);
 
   prototype.registerDependency = function(uuid) {
     if (this.currentContext) {

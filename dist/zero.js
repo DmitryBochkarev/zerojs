@@ -126,7 +126,7 @@ Zero.Observable = (function() {
     this.value = initialValue;
   }
 
-  var prototype = Observable.prototype = new EventEmitter();
+  var prototype = Observable.prototype = Object.create(EventEmitter.prototype);
 
   prototype.set = function(value) {
     var self = this;
@@ -166,7 +166,7 @@ Zero.Computed = (function() {
     self.lastContext = undefined;
   }
 
-  var prototype = Computed.prototype = new EventEmitter();
+  var prototype = Computed.prototype = Object.create(EventEmitter.prototype);
 
   prototype.get = function(context) {
     var self = this;
@@ -211,7 +211,7 @@ Zero.Subscriber = (function() {
     self.lastContext = undefined;
   }
 
-  var prototype = Subscriber.prototype = new EventEmitter();
+  var prototype = Subscriber.prototype = Object.create(EventEmitter.prototype);
 
   prototype.run = function(context) {
     var self = this;
@@ -275,7 +275,7 @@ Zero.Isolation = (function() {
     }
   }
 
-  var prototype = Isolation.prototype = new EventEmitter();
+  var prototype = Isolation.prototype = Object.create(EventEmitter.prototype);
 
   prototype.registerDependency = function(uuid) {
     if (this.currentContext) {

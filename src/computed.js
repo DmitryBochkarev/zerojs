@@ -13,7 +13,7 @@ Zero.Computed = (function() {
     self.lastContext = undefined;
   }
 
-  var prototype = Computed.prototype = new EventEmitter();
+  var prototype = Computed.prototype = Object.create(EventEmitter.prototype);
 
   prototype.get = function(context) {
     var self = this;

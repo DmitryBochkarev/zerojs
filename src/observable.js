@@ -8,7 +8,7 @@ Zero.Observable = (function() {
     this.value = initialValue;
   }
 
-  var prototype = Observable.prototype = new EventEmitter();
+  var prototype = Observable.prototype = Object.create(EventEmitter.prototype);
 
   prototype.set = function(value) {
     var self = this;
