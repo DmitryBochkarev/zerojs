@@ -68,4 +68,19 @@ describe('Zero.Subscriber', function() {
 
     expect(ret).to.be.equal(ctx);
   });
+
+  it('should run rerun in last context',  function() {
+    var ctx = {
+      a: 0
+    };
+    var subscribeFn = function() {
+      this.a++;
+    };
+    var subscriber = new Zero.Subscriber(subscribeFn);
+
+    subscriber.run(ctx)
+    subscriber.rerun();
+
+    expect(ctx.a).to.be.equal(2);
+  });
 });

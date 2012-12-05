@@ -208,4 +208,21 @@ describe('Zero.Computed', function() {
     expect(c).to.be.equal(2);
     expect(d).to.be.equal(3);
   });
+
+  it('should run recompute in last context',  function() {
+    var ctx = {
+      a: 0
+    };
+    var computeFn = function() {
+      this.a++;
+      return this.a;
+    };
+    var computed = new Zero.Computed(computeFn);
+
+    computed.get(ctx)
+    computed.shouldRecompute = true;
+    computed.recompute();
+
+    expect(ctx.a).to.be.equal(2);
+  });
 });
