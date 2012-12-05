@@ -24,7 +24,7 @@ Zero.Subscriber = (function() {
     return context;
   };
 
-  prototype.reRun = function() {
+  prototype.rerun = function() {
     return this.run(this.lastContext);
   };
 
