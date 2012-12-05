@@ -41,13 +41,13 @@ module.exports = function(grunt) {
         command: 'phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner.dist.html dot',
         stdout: true
       },
-      "test-min": {
+      "test-dist-min": {
         command: 'phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner.dist.min.html dot',
         stdout: true
       }
     }
   });
 
-  grunt.registerTask('default', 'lint exec:test concat:dist min:dist exec:test-dist exec:test-min');
+  grunt.registerTask('default', 'lint exec:test concat:dist min:dist exec:test-dist exec:test-dist-min');
   grunt.loadNpmTasks('grunt-exec');
 };
