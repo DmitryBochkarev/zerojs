@@ -1,5 +1,9 @@
 Zero = {};
 
+/*#DEBUG*/
+Zero.DEBUG = true;
+/*/DEBUG*/
+
 Zero.noop = function(val) { return val; };
 
 Zero.uuid = (function() {

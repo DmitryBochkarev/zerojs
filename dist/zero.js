@@ -1,5 +1,9 @@
 Zero = {};
 
+/*#DEBUG  
+Zero.DEBUG = true;
+  /DEBUG*/
+
 Zero.noop = function(val) { return val; };
 
 Zero.uuid = (function() {
@@ -279,11 +283,11 @@ Zero.Isolation = (function() {
 
   prototype.registerDependency = function(uuid) {
     if (this.currentContext) {
-      /*#DEBUG  
+      /*#DEBUG*/
       if (this.currentContext.uuid == uuid) {
         throw new Error('Recoursive call');
       }
-        /DEBUG*/
+      /*/DEBUG*/
       this.currentContext.dependencies.push(uuid);
     }
   };
