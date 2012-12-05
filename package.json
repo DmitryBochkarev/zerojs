@@ -10,6 +10,8 @@
   },
   "devDependencies": {
     "mocha": "*",
+    "mocha-phantomjs": "*",
+    "jade": "*",
     "chai": "*",
     "grunt-exec": "*"
   }

@@ -30,7 +30,11 @@ module.exports = function(grunt) {
     },
     exec: {
       test: {
-        command: 'mocha-phantomjs -R dot test/runner.html',
+        command: 'phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner.html dot',
+        stdout: true
+      },
+      "test-cov": {
+        command: ' rm -rf src-cov && jscoverage src src-cov && phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner-cov.html json-cov | node helpers/cov/buildHTML.js > coverage.html',
         stdout: true
       }
     }
