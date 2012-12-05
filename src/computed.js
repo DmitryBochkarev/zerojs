@@ -10,6 +10,7 @@ Zero.Computed = (function() {
     self.read = readComputeFn;
     self.value = undefined;
     self.shouldRecompute = true;
+    self.lastContext = undefined;
   }
 
   var prototype = Computed.prototype = new EventEmitter();
@@ -19,6 +20,7 @@ Zero.Computed = (function() {
     var oldValue = self.value;
     var newValue;
 
+    self.lastContext = context;
     self.emit('get');
 
     if (self.shouldRecompute) {
@@ -35,6 +37,10 @@ Zero.Computed = (function() {
     }
 
     return self.value;
+  };
+
+  prototype.recompute = function() {
+    return this.get(this.lastContext);
   };
 
   return Computed;
