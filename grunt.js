@@ -36,10 +36,18 @@ module.exports = function(grunt) {
       "test-cov": {
         command: ' rm -rf src-cov && jscoverage src src-cov && phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner-cov.html json-cov | node helpers/cov/buildHTML.js > coverage.html',
         stdout: true
+      },
+      "test-dist": {
+        command: 'phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner.dist.html dot',
+        stdout: true
+      },
+      "test-min": {
+        command: 'phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner.dist.min.html dot',
+        stdout: true
       }
     }
   });
 
-  grunt.registerTask('default', 'lint exec:test concat:dist min:dist');
+  grunt.registerTask('default', 'lint exec:test concat:dist min:dist exec:test-dist exec:test-min');
   grunt.loadNpmTasks('grunt-exec');
 };
