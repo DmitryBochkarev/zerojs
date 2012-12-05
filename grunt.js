@@ -4,7 +4,7 @@ module.exports = function(grunt) {
       src: ['src/*.js']
     },
     concat: {
-      dist: {
+      debug: {
         src: [
           'src/base.js',
           'src/event_handler.js',
@@ -15,10 +15,14 @@ module.exports = function(grunt) {
           'src/isolation_call_context.js',
           'src/isolation.js'
         ],
-        dest: 'dist/zero.js'
+        dest: 'dist/zero-debug.js'
       }
     },
     min: {
+      debug: {
+        src: 'dist/zero-debug.js',
+        dest: 'dist/zero-debug.min.js'
+      },
       dist: {
         src: 'dist/zero.js',
         dest: 'dist/zero.min.js'
@@ -29,12 +33,24 @@ module.exports = function(grunt) {
       tasks: 'lint exec:test'
     },
     exec: {
+      'build-dist': {
+        command: 'node helpers/removeDebug.js dist/zero-debug.js dist/zero.js',
+        stdout: true
+      },
       test: {
         command: 'phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner.html dot',
         stdout: true
       },
       "test-cov": {
         command: ' rm -rf src-cov && jscoverage src src-cov && phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner-cov.html json-cov | node helpers/cov/buildHTML.js > coverage.html',
+        stdout: true
+      },
+      "test-debug": {
+        command: 'phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner.debug.html dot',
+        stdout: true
+      },
+      "test-debug-min": {
+        command: 'phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner.debug.min.html dot',
         stdout: true
       },
       "test-dist": {
@@ -48,6 +64,6 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.registerTask('default', 'lint exec:test concat:dist min:dist exec:test-dist exec:test-dist-min');
+  grunt.registerTask('default', 'lint exec:test concat:debug min:debug exec:test-debug exec:test-debug-min exec:build-dist min:dist exec:test-dist exec:test-dist-min');
   grunt.loadNpmTasks('grunt-exec');
 };

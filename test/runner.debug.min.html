@@ -1,0 +1,33 @@
+<!doctype 5>
+<html>
+  <head>
+    <title>Slow tests</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="../node_modules/mocha/mocha.js"></script>
+    <script src="../node_modules/chai/chai.js"></script>
+    <script>
+      mocha.ui('bdd');
+      mocha.reporter('html');
+      expect = chai.expect;
+    </script>
+    <script src="../dist/zero-debug.min.js"></script>
+    <script src="base.js"></script>
+    <script src="event_emitter.js"></script>
+    <script src="observable.js"></script>
+    <script src="computed.js"></script>
+    <script src="subscriber.js"></script>
+    <script src="isolation_call_context.js"></script>
+    <script src="isolation.js"></script>
+    <script>
+      if (window.mochaPhantomJS) {
+        mochaPhantomJS.run();
+      } else {
+        mocha.run();
+      }
+    </script>
+  </body>
+</html>
