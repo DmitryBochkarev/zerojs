@@ -163,6 +163,7 @@ Zero.Computed = (function() {
     self.read = readComputeFn;
     self.value = undefined;
     self.shouldRecompute = true;
+    self.lastContext = undefined;
   }
 
   var prototype = Computed.prototype = new EventEmitter();
@@ -172,6 +173,7 @@ Zero.Computed = (function() {
     var oldValue = self.value;
     var newValue;
 
+    self.lastContext = context;
     self.emit('get');
 
     if (self.shouldRecompute) {
@@ -190,26 +192,41 @@ Zero.Computed = (function() {
     return self.value;
   };
 
+  prototype.recompute = function() {
+    return this.get(this.lastContext);
+  };
+
   return Computed;
 })();
 
 Zero.Subscriber = (function() {
   var EventEmitter = Zero.EventEmitter;
   function Subscriber(fn) {
-    EventEmitter.call(this);
+    var self = this;
 
-    this.uuid = Zero.uuid();
-    this.fn = fn;
+    EventEmitter.call(self);
+
+    self.uuid = Zero.uuid();
+    self.fn = fn;
+    self.lastContext = undefined;
   }
 
   var prototype = Subscriber.prototype = new EventEmitter();
 
   prototype.run = function(context) {
-    this.emit('start');
-    this.fn.call(context);
-    this.emit('end');
+    var self = this;
+    
+    self.lastContext = context;
+
+    self.emit('start');
+    self.fn.call(context);
+    self.emit('end');
 
     return context;
+  };
+
+  prototype.rerun = function() {
+    return this.run(this.lastContext);
   };
 
   return Subscriber;
@@ -272,11 +289,13 @@ Zero.Isolation = (function() {
   };
 
   prototype.setContext = function(uuid) {
-    if (this.currentContext) {
-      this.callStack.unshift(this.currentContext);
+    var self = this;
+
+    if (self.currentContext) {
+      self.callStack.unshift(self.currentContext);
     }
 
-    this.currentContext = new Zero.IsolationCallContext(uuid);
+    self.currentContext = new Zero.IsolationCallContext(uuid);
   };
 
   prototype.closeContext = function() {
