@@ -78,5 +78,22 @@ describe('Isolation', function() {
   }); // observable
 
   describe('computed', function() {
+    it('should be registered as computed', function() {
+      var computedInstance = new Zero.Computed(Zero.noop);
+
+      isolation.registerComputed(computedInstance);
+
+      expect(isolation.computed[computedInstance.uuid]).to.be.equal(computedInstance);
+    });
+  }); // computed
+
+  describe('subscriber', function() {
+    it('should be registered as subscriber', function() {
+      var computedInstance = new Zero.Computed(Zero.noop);
+
+      isolation.registerComputed(computedInstance);
+
+      expect(isolation.computed[computedInstance.uuid]).to.be.equal(computedInstance);
+    });
   }); // computed
 });

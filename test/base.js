@@ -1,21 +1,3 @@
-describe('Zero', function() {
-  it('Should exist', function() {
-    expect(Zero).to.not.be.undefined;
-  });
-
-  it('Should have EventHandler', function() {
-    expect(Zero.EventHandler).to.not.be.undefined;
-  });
-
-  it('Should have EventEmitter', function() {
-    expect(Zero.EventEmitter).to.not.be.undefined;
-  });
-
-  it('Should have Isolation', function() {
-    expect(Zero.Isolation).to.not.be.undefined;
-  });
-});
-
 describe('Helpers', function() {
   describe('noop', function() {
     it('should return passing value', function() {
@@ -49,7 +31,7 @@ describe('Helpers', function() {
         setTimeout(function() {
           expect(i).to.be.equal(1);
           done();
-        }, 100);
+        }, 1);
       };
 
       var deferred = Zero.deferred(1, function() {
