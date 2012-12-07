@@ -240,6 +240,7 @@ Zero.IsolationCallContext = (function() {
   function IsolationCallContext(uuid) {
     this.uuid = uuid;
     this.dependencies = [];
+    this.relations = [];
   }
 
   return IsolationCallContext;
@@ -255,9 +256,10 @@ Zero.Isolation = (function() {
     self.observables = {};
     self.computed = {};
     self.subscribers = {};
+
     self.callStack = [];
     self.currentContext = undefined;
-    self.dependencies = {};
+    self.contexts = {};
 
     self.on('read:observable', registerDependency);
     self.on('read:computed', registerDependency);
@@ -289,7 +291,22 @@ Zero.Isolation = (function() {
       }
       /*/DEBUG*/
       this.currentContext.dependencies.push(uuid);
+      this.registerRelation(this.currentContext.uuid, uuid);
     }
+  };
+
+  prototype.registerRelation = function(callerUuid, calledUuid) {
+    if (!this.contexts[calledUuid]) {
+      this.contexts[calledUuid] = new Zero.IsolationCallContext();
+    }
+
+    this.contexts[calledUuid].relations.push(callerUuid);
+  };
+
+  prototype.removeRelation = function(callerUuid, calledUuid) {
+    this.contexts[calledUuid].relations = this.contexts[calledUuid].relations.filter(function(uuid) {
+      return uuid !== callerUuid;
+    });
   };
 
   prototype.setContext = function(uuid) {
@@ -299,15 +316,21 @@ Zero.Isolation = (function() {
       self.callStack.unshift(self.currentContext);
     }
 
-    self.currentContext = new Zero.IsolationCallContext(uuid);
+    if (!self.contexts[uuid]) {
+      self.contexts[uuid] = new Zero.IsolationCallContext(uuid);
+    }
+
+    self.currentContext = self.contexts[uuid];
+
+    self.currentContext.dependencies.forEach(function(calledUuid) {
+      self.removeRelation(uuid, calledUuid);
+    });
+
+    self.currentContext.dependencies = [];
   };
 
   prototype.closeContext = function() {
-    var self = this;
-    
-    self.dependencies[self.currentContext.uuid] = self.currentContext.dependencies;
-
-    self.currentContext = self.callStack.shift();
+    this.currentContext = this.callStack.shift();
   };
 
   prototype.observable = function(initialValue) {

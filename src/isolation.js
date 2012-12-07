@@ -82,9 +82,7 @@ Zero.Isolation = (function() {
   };
 
   prototype.closeContext = function() {
-    var self = this;
-    
-    self.currentContext = self.callStack.shift();
+    this.currentContext = this.callStack.shift();
   };
 
   prototype.observable = function(initialValue) {
