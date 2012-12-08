@@ -1,7 +1,13 @@
 Zero = {};
 
 /*#DEBUG*/
-Zero.DEBUG = true;
+Zero.DEBUG = {};
+
+['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'].forEach(function(name) {
+  Zero.DEBUG['is' + name] = function(obj) {
+    return Object.prototype.toString.call(obj) == '[object ' + name + ']';
+  };
+});
 /*/DEBUG*/
 
 Zero.noop = function(val) { return val; };
@@ -32,6 +38,12 @@ Zero.deferred = (function() {
 
 Zero.EventHandler = (function() {
   function EventHandler(fn, once) {
+    /*#DEBUG*/
+    if (typeof fn !== 'function') {
+      throw new Error('Event handler must be a function');
+    }
+    /*/DEBUG*/
+
     this.fn = fn;
     this.once = !!once;
   }
@@ -50,6 +62,16 @@ Zero.EventEmitter = (function() {
   var prototype = EventEmitter.prototype;
 
   prototype.on = function(event, handler) {
+    /*#DEBUG*/
+    if (!Zero.DEBUG.isString(event)) {
+      throw new Error('Event name must be a string');
+    }
+
+    if (!(Zero.DEBUG.isFunction(handler) || (handler instanceof Zero.EventHandler))) {
+      throw new Error('Event handler must be a function or instance of EventHandler');
+    }
+    /*/DEBUG*/
+
     var eventHandler = handler instanceof EventHandler ? handler : new EventHandler(handler, false);
     var handlers = this._handlers;
 
@@ -63,6 +85,16 @@ Zero.EventEmitter = (function() {
   };
 
   prototype.off = function(event, handler) {
+    /*#DEBUG*/
+    if (event && !Zero.DEBUG.isString(event)) {
+      throw new Error('Event name must be a string');
+    }
+
+    if (handler && !(Zero.DEBUG.isFunction(handler) || (handler instanceof Zero.EventHandler))) {
+      throw new Error('Event handler must be a function or instance of EventHandler');
+    }
+    /*/DEBUG*/
+
     var eventHandler;
     var self = this;
     var handlers = self._handlers;
@@ -91,6 +123,16 @@ Zero.EventEmitter = (function() {
   };
 
   prototype.once = function(event, handler) {
+    /*#DEBUG*/
+    if (!Zero.DEBUG.isString(event)) {
+      throw new Error('Event name must be a string');
+    }
+
+    if (!(Zero.DEBUG.isFunction(handler) || (handler instanceof Zero.EventHandler))) {
+      throw new Error('Event handler must be a function or instance of EventHandler');
+    }
+    /*/DEBUG*/
+
     var eventHandler = new EventHandler((handler instanceof EventHandler ? handler.fn : handler), true);
     
     return this.on(event, eventHandler);
@@ -98,6 +140,13 @@ Zero.EventEmitter = (function() {
 
   prototype.emit = function() {
     var event = arguments[0];
+
+    /*#DEBUG*/
+    if (!Zero.DEBUG.isString(event)) {
+      throw new Error('Event name must be a string');
+    }
+    /*/DEBUG*/
+
     var args;
     var self = this;
     var handlers = self._handlers;
@@ -159,6 +208,12 @@ Zero.Computed = (function() {
   var EventEmitter = Zero.EventEmitter;
 
   function Computed(readComputeFn) {
+    /*#DEBUG*/
+    if (typeof readComputeFn !== 'function') {
+      throw new Error('Computed should be a function');
+    }
+    /*/DEBUG*/
+
     var self = this;
 
     EventEmitter.call(self);
@@ -206,6 +261,12 @@ Zero.Computed = (function() {
 Zero.Subscriber = (function() {
   var EventEmitter = Zero.EventEmitter;
   function Subscriber(fn) {
+    /*#DEBUG*/
+    if (!Zero.DEBUG.isFunction(fn)) {
+      throw new Error('Subscribe function must be a function');
+    }
+    /*/DEBUG*/
+
     var self = this;
 
     EventEmitter.call(self);
@@ -238,6 +299,12 @@ Zero.Subscriber = (function() {
 
 Zero.IsolationCallContext = (function() {
   function IsolationCallContext(uuid) {
+    /*#DEBUG*/
+    if (!uuid) {
+      throw new Error('uuid must present');
+    }
+    /*/DEBUG*/
+
     this.uuid = uuid;
     this.dependencies = [];
     this.relations = [];
@@ -251,6 +318,7 @@ Zero.Isolation = (function() {
 
   function Isolation() {
     var self = this;
+
     EventEmitter.call(self);
 
     self.observables = {};
@@ -290,6 +358,7 @@ Zero.Isolation = (function() {
         throw new Error('Recoursive call');
       }
       /*/DEBUG*/
+
       this.currentContext.dependencies.push(uuid);
       this.registerRelation(this.currentContext.uuid, uuid);
     }

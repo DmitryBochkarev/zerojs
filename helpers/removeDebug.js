@@ -8,7 +8,7 @@ fs.writeFileSync(path.resolve(process.cwd(), outputFile), removeDebug(content), 
 
 function removeDebug(content) {
   return content
-            .replace('/*#DEBUG*/', '/*#DEBUG  ')
-            .replace('/*/DEBUG*/', '  /DEBUG*/');
+            .replace(/\/\*#DEBUG\*\//g, '/*#DEBUG  ')
+            .replace(/\/\*\/DEBUG\*\//g, '  /DEBUG*/');
             
 }

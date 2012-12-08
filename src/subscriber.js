@@ -1,6 +1,12 @@
 Zero.Subscriber = (function() {
   var EventEmitter = Zero.EventEmitter;
   function Subscriber(fn) {
+    /*#DEBUG*/
+    if (!Zero.DEBUG.isFunction(fn)) {
+      throw new Error('Subscribe function must be a function');
+    }
+    /*/DEBUG*/
+
     var self = this;
 
     EventEmitter.call(self);

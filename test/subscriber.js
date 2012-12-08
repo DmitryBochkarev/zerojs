@@ -1,4 +1,16 @@
 describe('Zero.Subscriber', function() {
+  if (Zero.DEBUG) {
+    describe('DEBUG', function() {
+      it('should throw error when argument not a function', function() {
+        var fn = function() {
+          new Zero.Subscriber();
+        };
+
+        expect(fn).to.throw('Subscribe function must be a function');
+      });
+    });
+  }
+
   it('should be an instance of EventEmitter', function() {
     var subscriber = new Zero.Subscriber(Zero.noop);
 

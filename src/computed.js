@@ -2,6 +2,12 @@ Zero.Computed = (function() {
   var EventEmitter = Zero.EventEmitter;
 
   function Computed(readComputeFn) {
+    /*#DEBUG*/
+    if (typeof readComputeFn !== 'function') {
+      throw new Error('Computed should be a function');
+    }
+    /*/DEBUG*/
+
     var self = this;
 
     EventEmitter.call(self);

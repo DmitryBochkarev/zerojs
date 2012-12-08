@@ -8,6 +8,16 @@ Zero.EventEmitter = (function() {
   var prototype = EventEmitter.prototype;
 
   prototype.on = function(event, handler) {
+    /*#DEBUG*/
+    if (!Zero.DEBUG.isString(event)) {
+      throw new Error('Event name must be a string');
+    }
+
+    if (!(Zero.DEBUG.isFunction(handler) || (handler instanceof Zero.EventHandler))) {
+      throw new Error('Event handler must be a function or instance of EventHandler');
+    }
+    /*/DEBUG*/
+
     var eventHandler = handler instanceof EventHandler ? handler : new EventHandler(handler, false);
     var handlers = this._handlers;
 
@@ -21,6 +31,16 @@ Zero.EventEmitter = (function() {
   };
 
   prototype.off = function(event, handler) {
+    /*#DEBUG*/
+    if (event && !Zero.DEBUG.isString(event)) {
+      throw new Error('Event name must be a string');
+    }
+
+    if (handler && !(Zero.DEBUG.isFunction(handler) || (handler instanceof Zero.EventHandler))) {
+      throw new Error('Event handler must be a function or instance of EventHandler');
+    }
+    /*/DEBUG*/
+
     var eventHandler;
     var self = this;
     var handlers = self._handlers;
@@ -49,6 +69,16 @@ Zero.EventEmitter = (function() {
   };
 
   prototype.once = function(event, handler) {
+    /*#DEBUG*/
+    if (!Zero.DEBUG.isString(event)) {
+      throw new Error('Event name must be a string');
+    }
+
+    if (!(Zero.DEBUG.isFunction(handler) || (handler instanceof Zero.EventHandler))) {
+      throw new Error('Event handler must be a function or instance of EventHandler');
+    }
+    /*/DEBUG*/
+
     var eventHandler = new EventHandler((handler instanceof EventHandler ? handler.fn : handler), true);
     
     return this.on(event, eventHandler);
@@ -56,6 +86,13 @@ Zero.EventEmitter = (function() {
 
   prototype.emit = function() {
     var event = arguments[0];
+
+    /*#DEBUG*/
+    if (!Zero.DEBUG.isString(event)) {
+      throw new Error('Event name must be a string');
+    }
+    /*/DEBUG*/
+
     var args;
     var self = this;
     var handlers = self._handlers;

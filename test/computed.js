@@ -1,4 +1,16 @@
 describe('Zero.Computed', function() {
+  if (Zero.DEBUG) {
+    describe('DEBUG', function() {
+      it('should throw error when argument non a function', function() {
+        var fn = function() {
+          new Zero.Computed();
+        };
+
+        expect(fn).to.throw('Computed should be a function');
+      });
+    });
+  }
+
   it('should be an instance of EventEmitter', function() {
     var computed = new Zero.Computed(Zero.noop);
 
@@ -19,7 +31,6 @@ describe('Zero.Computed', function() {
       return 1;
     };
     var computed = new Zero.Computed(computeFn);
-
     var b = computed.get();
 
     expect(a).to.be.equal(1);

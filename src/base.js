@@ -1,7 +1,13 @@
 Zero = {};
 
 /*#DEBUG*/
-Zero.DEBUG = true;
+Zero.DEBUG = {};
+
+['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'].forEach(function(name) {
+  Zero.DEBUG['is' + name] = function(obj) {
+    return Object.prototype.toString.call(obj) == '[object ' + name + ']';
+  };
+});
 /*/DEBUG*/
 
 Zero.noop = function(val) { return val; };

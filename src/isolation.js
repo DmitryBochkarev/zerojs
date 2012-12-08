@@ -3,6 +3,7 @@ Zero.Isolation = (function() {
 
   function Isolation() {
     var self = this;
+
     EventEmitter.call(self);
 
     self.observables = {};
@@ -42,6 +43,7 @@ Zero.Isolation = (function() {
         throw new Error('Recoursive call');
       }
       /*/DEBUG*/
+
       this.currentContext.dependencies.push(uuid);
       this.registerRelation(this.currentContext.uuid, uuid);
     }

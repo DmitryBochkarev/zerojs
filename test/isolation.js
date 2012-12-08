@@ -1,4 +1,4 @@
-describe('Isolation', function() {
+describe('Zero.Isolation', function() {
   var isolation;
 
   beforeEach(function() {
