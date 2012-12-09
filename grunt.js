@@ -6,6 +6,7 @@ module.exports = function(grunt) {
     concat: {
       debug: {
         src: [
+          'helpers/src/before.js',
           'src/base.js',
           'src/event_handler.js',
           'src/event_emitter.js',
@@ -13,7 +14,8 @@ module.exports = function(grunt) {
           'src/computed.js',
           'src/subscriber.js',
           'src/isolation_call_context.js',
-          'src/isolation.js'
+          'src/isolation.js',
+          'helpers/src/after.js'
         ],
         dest: 'dist/zero-debug.js'
       }

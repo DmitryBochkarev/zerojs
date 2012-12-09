@@ -1,5 +1,6 @@
 Zero.Subscriber = (function() {
   var EventEmitter = Zero.EventEmitter;
+
   function Subscriber(fn) {
     /*#DEBUG*/
     if (!Zero.DEBUG.isFunction(fn)) {

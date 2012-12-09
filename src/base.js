@@ -1,6 +1,8 @@
-Zero = {};
-
 /*#DEBUG*/
+if (!window.Zero) {
+  Zero = {};
+}
+
 Zero.DEBUG = {};
 
 ['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'].forEach(function(name) {
@@ -20,18 +22,15 @@ Zero.uuid = (function() {
   };
 })();
 
-Zero.deferred = (function() {
-  function deferred(wait, fn) {
-    var timer;
+Zero.deferred = function(wait, fn) {
+  var timer;
 
-    return function () {
-      if (timer) {
-        clearTimeout(timer);
-      }
+  return function () {
+    if (timer) {
+      clearTimeout(timer);
+    }
 
-      timer = setTimeout(fn.bind(this), wait);
-    };
-  }
+    timer = setTimeout(fn.bind(this), wait);
+  };
+};
 
-  return deferred;
-})();

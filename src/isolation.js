@@ -36,57 +36,6 @@ Zero.Isolation = (function() {
 
   var prototype = Isolation.prototype = Object.create(EventEmitter.prototype);
 
-  prototype.registerDependency = function(uuid) {
-    if (this.currentContext) {
-      /*#DEBUG*/
-      if (this.currentContext.uuid == uuid) {
-        throw new Error('Recoursive call');
-      }
-      /*/DEBUG*/
-
-      this.currentContext.dependencies.push(uuid);
-      this.registerRelation(this.currentContext.uuid, uuid);
-    }
-  };
-
-  prototype.registerRelation = function(callerUuid, calledUuid) {
-    if (!this.contexts[calledUuid]) {
-      this.contexts[calledUuid] = new Zero.IsolationCallContext();
-    }
-
-    this.contexts[calledUuid].relations.push(callerUuid);
-  };
-
-  prototype.removeRelation = function(callerUuid, calledUuid) {
-    this.contexts[calledUuid].relations = this.contexts[calledUuid].relations.filter(function(uuid) {
-      return uuid !== callerUuid;
-    });
-  };
-
-  prototype.setContext = function(uuid) {
-    var self = this;
-
-    if (self.currentContext) {
-      self.callStack.unshift(self.currentContext);
-    }
-
-    if (!self.contexts[uuid]) {
-      self.contexts[uuid] = new Zero.IsolationCallContext(uuid);
-    }
-
-    self.currentContext = self.contexts[uuid];
-
-    self.currentContext.dependencies.forEach(function(calledUuid) {
-      self.removeRelation(uuid, calledUuid);
-    });
-
-    self.currentContext.dependencies = [];
-  };
-
-  prototype.closeContext = function() {
-    this.currentContext = this.callStack.shift();
-  };
-
   prototype.observable = function(initialValue) {
     var observable = new Zero.Observable(initialValue);
 
@@ -180,6 +129,65 @@ Zero.Isolation = (function() {
     }
     
     return _subscriber;
+  };
+
+  prototype.registerDependency = function(uuid) {
+    var currentContext = this.currentContext;
+
+    if (currentContext) {
+      /*#DEBUG*/
+      if (currentContext.uuid == uuid) {
+        throw new Error('Recoursive call');
+      }
+      /*/DEBUG*/
+
+      currentContext.dependencies.push(uuid);
+      this.registerRelation(currentContext.uuid, uuid);
+    }
+  };
+
+  prototype.registerRelation = function(callerUuid, calledUuid) {
+    var contexts = this.contexts;
+
+    if (!contexts[calledUuid]) {
+      contexts[calledUuid] = new Zero.IsolationCallContext();
+    }
+
+    contexts[calledUuid].relations.push(callerUuid);
+  };
+
+  prototype.removeRelation = function(callerUuid, calledUuid) {
+    var context = this.contexts[calledUuid];
+
+    context.relations = context.relations.filter(function(uuid) {
+      return uuid !== callerUuid;
+    });
+  };
+
+  prototype.setContext = function(uuid) {
+    var self = this;
+    var currentContext = self.currentContext;
+    var contexts = self.contexts;
+
+    if (currentContext) {
+      self.callStack.unshift(currentContext);
+    }
+
+    if (!contexts[uuid]) {
+      contexts[uuid] = new Zero.IsolationCallContext(uuid);
+    }
+
+    currentContext = self.currentContext = contexts[uuid];
+
+    currentContext.dependencies.forEach(function(calledUuid) {
+      self.removeRelation(uuid, calledUuid);
+    });
+
+    currentContext.dependencies = [];
+  };
+
+  prototype.closeContext = function() {
+    this.currentContext = this.callStack.shift();
   };
 
   return Isolation;

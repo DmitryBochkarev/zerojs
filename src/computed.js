@@ -3,7 +3,7 @@ Zero.Computed = (function() {
 
   function Computed(readComputeFn) {
     /*#DEBUG*/
-    if (typeof readComputeFn !== 'function') {
+    if (!Zero.DEBUG.isFunction(readComputeFn)) {
       throw new Error('Computed should be a function');
     }
     /*/DEBUG*/
