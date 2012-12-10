@@ -8,6 +8,7 @@ module.exports = function(grunt) {
         src: [
           'helpers/src/before.js',
           'src/base.js',
+          'src/set.js',
           'src/event_handler.js',
           'src/event_emitter.js',
           'src/observable.js',

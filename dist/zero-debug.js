@@ -38,6 +38,44 @@ Zero.deferred = function(wait, fn) {
 };
 
 
+Zero.Set = (function() {
+  function Set(elements) {
+    /*#DEBUG*/
+    if (elements && !Array.isArray(elements)) {
+      throw new Error('Elements must be an array');
+    }
+    /*/DEBUG*/
+
+    this.elements = elements || [];
+  }
+  
+  var prototype = Set.prototype;
+
+  prototype.has = function(element) {
+    return (this.elements.indexOf(element) >= 0);
+  };
+
+  prototype.add = function(element) {
+    if (!this.has(element)) {
+      this.elements.push(element);
+    }
+  };
+
+  prototype.remove = function(element) {
+    var index = this.elements.indexOf(element);
+
+    if (index > 0) {
+      this.elements.splice(index, 1);
+    }
+  };
+
+  prototype.clear = function() {
+    this.elements = [];
+  };
+
+  return Set;
+})();
+
 Zero.EventHandler = (function() {
   function EventHandler(fn, once) {
     /*#DEBUG*/
@@ -309,8 +347,8 @@ Zero.IsolationCallContext = (function() {
     /*/DEBUG*/
 
     this.uuid = uuid;
-    this.dependencies = [];
-    this.relations = [];
+    this.dependencies = new Zero.Set();
+    this.relations = new Zero.Set();
   }
 
   return IsolationCallContext;
@@ -331,25 +369,6 @@ Zero.Isolation = (function() {
     self.callStack = [];
     self.currentContext = undefined;
     self.contexts = {};
-
-    self.on('read:observable', registerDependency);
-    self.on('read:computed', registerDependency);
-    self.on('start:computed', setContext);
-    self.on('end:computed', closeContext);
-    self.on('start:subscriber', setContext);
-    self.on('end:subscriber', closeContext);
-
-    function registerDependency(uuid) {
-      self.registerDependency(uuid);
-    }
-
-    function setContext(uuid) {
-      self.setContext(uuid);
-    }
-
-    function closeContext(uuid) {
-      self.closeContext();
-    }
   }
 
   var prototype = Isolation.prototype = Object.create(EventEmitter.prototype);
@@ -367,7 +386,7 @@ Zero.Isolation = (function() {
     isolation.observables[uuid] = observable;
     
     observable.on('get', function() {
-      isolation.emit('read:observable', uuid);
+      isolation.registerDependency(uuid);
     });
 
     observable.on('change', function() {
@@ -400,19 +419,21 @@ Zero.Isolation = (function() {
     isolation.computed[uuid] = computed;
 
     computed.on('get', function() {
-      isolation.emit('read:computed', uuid);
+      isolation.registerDependency(uuid);
     });
 
+    /*
     computed.on('change', function() {
       isolation.emit('write:computed', uuid);
     });
+    */
 
     computed.on('start', function() {
-      isolation.emit('start:compute', uuid);
+      isolation.setContext(uuid);
     });
 
     computed.on('end', function() {
-      isolation.emit('end:compute', uuid);
+      isolation.closeContext();
     });
     
     function _computed() {
@@ -435,11 +456,11 @@ Zero.Isolation = (function() {
     isolation.subscribers[uuid] = subscriber;
 
     subscriber.on('start', function() {
-      isolation.emit('start:subscriber', uuid);
+      isolation.setContext(uuid);
     });
 
     subscriber.on('end', function() {
-      isolation.emit('end:subscriber', uuid);
+      isolation.closeContext();
     });
 
     function _subscriber() {
@@ -447,39 +468,6 @@ Zero.Isolation = (function() {
     }
     
     return _subscriber;
-  };
-
-  prototype.registerDependency = function(uuid) {
-    var currentContext = this.currentContext;
-
-    if (currentContext) {
-      /*#DEBUG*/
-      if (currentContext.uuid == uuid) {
-        throw new Error('Recoursive call');
-      }
-      /*/DEBUG*/
-
-      currentContext.dependencies.push(uuid);
-      this.registerRelation(currentContext.uuid, uuid);
-    }
-  };
-
-  prototype.registerRelation = function(callerUuid, calledUuid) {
-    var contexts = this.contexts;
-
-    if (!contexts[calledUuid]) {
-      contexts[calledUuid] = new Zero.IsolationCallContext();
-    }
-
-    contexts[calledUuid].relations.push(callerUuid);
-  };
-
-  prototype.removeRelation = function(callerUuid, calledUuid) {
-    var context = this.contexts[calledUuid];
-
-    context.relations = context.relations.filter(function(uuid) {
-      return uuid !== callerUuid;
-    });
   };
 
   prototype.setContext = function(uuid) {
@@ -497,15 +485,46 @@ Zero.Isolation = (function() {
 
     currentContext = self.currentContext = contexts[uuid];
 
-    currentContext.dependencies.forEach(function(calledUuid) {
+    currentContext.dependencies.elements.forEach(function(calledUuid) {
       self.removeRelation(uuid, calledUuid);
     });
 
-    currentContext.dependencies = [];
+    currentContext.dependencies.clear();
   };
 
   prototype.closeContext = function() {
     this.currentContext = this.callStack.shift();
+  };
+
+  prototype.registerDependency = function(uuid) {
+    var currentContext = this.currentContext;
+
+    if (currentContext) {
+      /*#DEBUG*/
+      if (currentContext.uuid == uuid) {
+        throw new Error('Recoursive call');
+      }
+      /*/DEBUG*/
+
+      currentContext.dependencies.add(uuid);
+      this.registerRelation(currentContext.uuid, uuid);
+    }
+  };
+
+  prototype.registerRelation = function(callerUuid, calledUuid) {
+    var contexts = this.contexts;
+
+    if (!contexts[calledUuid]) {
+      contexts[calledUuid] = new Zero.IsolationCallContext();
+    }
+
+    contexts[calledUuid].relations.add(callerUuid);
+  };
+
+  prototype.removeRelation = function(callerUuid, calledUuid) {
+    var context = this.contexts[calledUuid];
+
+    context.relations.remove(callerUuid);
   };
 
   return Isolation;

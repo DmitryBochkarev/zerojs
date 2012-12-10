@@ -7,8 +7,8 @@ Zero.IsolationCallContext = (function() {
     /*/DEBUG*/
 
     this.uuid = uuid;
-    this.dependencies = [];
-    this.relations = [];
+    this.dependencies = new Zero.Set();
+    this.relations = new Zero.Set();
   }
 
   return IsolationCallContext;
