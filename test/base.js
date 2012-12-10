@@ -43,6 +43,23 @@ describe('Helpers', function() {
       deferred();
       check();
     });
+
+    it('should run in called context', function(done) {
+      var deferred = Zero.deferred(1, function() {
+        this.i++;
+      });
+      var ctx = {
+        i: 0,
+        deferred: deferred
+      };
+      
+      ctx.deferred();
+
+      setTimeout(function() {
+        expect(ctx.i).to.be.equal(1);
+        done();
+      }, 1);
+    });
   });
 });
 
