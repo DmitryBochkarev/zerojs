@@ -27,6 +27,7 @@ Zero.Computed = (function() {
     var newValue;
 
     self.lastContext = context;
+
     self.emit('get');
 
     if (self.shouldRecompute) {

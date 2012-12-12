@@ -13,6 +13,12 @@ Zero.Isolation = (function() {
     self.callStack = [];
     self.currentContext = undefined;
     self.contexts = {};
+
+    self.changedObservables = new Zero.Set();
+    self.changedComputed = new Zero.Set();
+    self.subscribersToRerun = new Zero.Set();
+
+    self.rerunSubscribers = Zero.deferred(1, this.rerunSubscribers);
   }
 
   var prototype = Isolation.prototype = Object.create(EventEmitter.prototype);
@@ -34,12 +40,12 @@ Zero.Isolation = (function() {
     });
 
     observable.on('change', function() {
-      isolation.emit('write:observable', uuid);
+      isolation.addChangedObservable(uuid);
     });
 
-    function _observable() {
+    function _observable(newValue) {
       if (arguments.length > 0) {
-        observable.set(arguments[0]);
+        observable.set(newValue);
 
         return this;
       } else {
@@ -66,11 +72,9 @@ Zero.Isolation = (function() {
       isolation.registerDependency(uuid);
     });
 
-    /*
     computed.on('change', function() {
-      isolation.emit('write:computed', uuid);
+      isolation.addChangedComputed(uuid);
     });
-    */
 
     computed.on('start', function() {
       isolation.setContext(uuid);
@@ -169,6 +173,19 @@ Zero.Isolation = (function() {
     var context = this.contexts[calledUuid];
 
     context.relations.remove(callerUuid);
+  };
+
+  prototype.addChangedObservable = function(uuid) {
+    this.changedObservables.add(uuid);
+    this.rerunSubscribers();
+  };
+
+  prototype.addChangedComputed = function(uuid) {
+    this.changedComputed.add(uuid);
+    this.rerunSubscribers();
+  };
+
+  rototype.rerunSubscribers = function() {
   };
 
   return Isolation;
