@@ -273,6 +273,7 @@ Zero.Computed = (function() {
     var newValue;
 
     self.lastContext = context;
+
     self.emit('get');
 
     if (self.shouldRecompute) {
@@ -292,6 +293,7 @@ Zero.Computed = (function() {
   };
 
   prototype.recompute = function() {
+    this.shouldRecompute = true;
     return this.get(this.lastContext);
   };
 
@@ -356,22 +358,27 @@ Zero.IsolationCallContext = (function() {
 
 Zero.Isolation = (function() {
   var EventEmitter = Zero.EventEmitter;
+  var Set = Zero.Set;
+  var IsolationCallContext = Zero.IsolationCallContext;
 
   function Isolation() {
     var self = this;
 
-    EventEmitter.call(self);
+    self._observables = {};
+    self._computed = {};
+    self._subscribers = {};
 
-    self.observables = {};
-    self.computed = {};
-    self.subscribers = {};
+    self._callStack = [];
+    self._currentContext = undefined;
+    self._contexts = {};
 
-    self.callStack = [];
-    self.currentContext = undefined;
-    self.contexts = {};
+    self._computedToRecompute = new Set();
+    self._subscribersToRerun = new Set();
+
+    self.resolve = Zero.deferred(10, this.resolve);
   }
 
-  var prototype = Isolation.prototype = Object.create(EventEmitter.prototype);
+  var prototype = Isolation.prototype;
 
   prototype.observable = function(initialValue) {
     var observable = new Zero.Observable(initialValue);
@@ -383,19 +390,19 @@ Zero.Isolation = (function() {
     var isolation = this;
     var uuid = observable.uuid;
 
-    isolation.observables[uuid] = observable;
+    isolation._observables[uuid] = observable;
     
     observable.on('get', function() {
       isolation.registerDependency(uuid);
     });
 
     observable.on('change', function() {
-      isolation.emit('write:observable', uuid);
+      isolation.registerChanged(uuid);
     });
 
-    function _observable() {
+    function _observable(newValue) {
       if (arguments.length > 0) {
-        observable.set(arguments[0]);
+        observable.set(newValue);
 
         return this;
       } else {
@@ -416,17 +423,15 @@ Zero.Isolation = (function() {
     var isolation = this;
     var uuid = computed.uuid;
 
-    isolation.computed[uuid] = computed;
+    isolation._computed[uuid] = computed;
 
     computed.on('get', function() {
       isolation.registerDependency(uuid);
     });
 
-    /*
     computed.on('change', function() {
-      isolation.emit('write:computed', uuid);
+      isolation.registerChanged(uuid);
     });
-    */
 
     computed.on('start', function() {
       isolation.setContext(uuid);
@@ -444,7 +449,7 @@ Zero.Isolation = (function() {
   };
 
   prototype.subscribe = function(subscribeFn) {
-    var subscriber = new Zero.Subscriber();
+    var subscriber = new Zero.Subscriber(subscribeFn);
 
     return this.registerSubscriber(subscriber);
   };
@@ -453,7 +458,7 @@ Zero.Isolation = (function() {
     var isolation = this;
     var uuid = subscriber.uuid;
 
-    isolation.subscribers[uuid] = subscriber;
+    isolation._subscribers[uuid] = subscriber;
 
     subscriber.on('start', function() {
       isolation.setContext(uuid);
@@ -472,18 +477,18 @@ Zero.Isolation = (function() {
 
   prototype.setContext = function(uuid) {
     var self = this;
-    var currentContext = self.currentContext;
-    var contexts = self.contexts;
+    var currentContext = self._currentContext;
+    var contexts = self._contexts;
 
     if (currentContext) {
-      self.callStack.unshift(currentContext);
+      self._callStack.unshift(currentContext);
     }
 
     if (!contexts[uuid]) {
-      contexts[uuid] = new Zero.IsolationCallContext(uuid);
+      contexts[uuid] = new IsolationCallContext(uuid);
     }
 
-    currentContext = self.currentContext = contexts[uuid];
+    currentContext = self._currentContext = contexts[uuid];
 
     currentContext.dependencies.elements.forEach(function(calledUuid) {
       self.removeRelation(uuid, calledUuid);
@@ -493,11 +498,11 @@ Zero.Isolation = (function() {
   };
 
   prototype.closeContext = function() {
-    this.currentContext = this.callStack.shift();
+    this._currentContext = this._callStack.shift();
   };
 
   prototype.registerDependency = function(uuid) {
-    var currentContext = this.currentContext;
+    var currentContext = this._currentContext;
 
     if (currentContext) {
       /*#DEBUG  
@@ -512,19 +517,67 @@ Zero.Isolation = (function() {
   };
 
   prototype.registerRelation = function(callerUuid, calledUuid) {
-    var contexts = this.contexts;
+    var contexts = this._contexts;
 
     if (!contexts[calledUuid]) {
-      contexts[calledUuid] = new Zero.IsolationCallContext();
+      contexts[calledUuid] = new IsolationCallContext(calledUuid);
     }
 
     contexts[calledUuid].relations.add(callerUuid);
   };
 
   prototype.removeRelation = function(callerUuid, calledUuid) {
-    var context = this.contexts[calledUuid];
+    var context = this._contexts[calledUuid];
 
     context.relations.remove(callerUuid);
+  };
+
+  prototype.registerChanged = function(uuid) {
+    var self = this ;
+    var context = self._contexts[uuid];
+    var relations;
+
+    if (context) {
+      relations = context.relations.elements;
+
+      if (relations.length > 0) {
+        relations.forEach(function(uuid) {
+          if (self._computed[uuid]) {
+            self._computedToRecompute.add(uuid);
+          } else if (self._subscribers[uuid]) {
+            self._subscribersToRerun.add(uuid);
+          }
+        });
+
+        self.resolve();
+      }
+    }
+  };
+
+  prototype.resolve = function() {
+    var self = this;
+    var computedToRecompute = self._computedToRecompute;
+    var subscribersToRerun = self._subscribersToRerun;
+
+    if (subscribersToRerun.elements.length > 0) {
+      if (computedToRecompute.elements.length > 0) {
+        self._computedToRecompute = new Set();
+
+        computedToRecompute.elements.forEach(function(uuid) {
+          self._computed[uuid].recompute();
+        });
+
+        self.resolve();
+      } else {
+        self._subscribersToRerun = new Set();
+
+        subscribersToRerun.elements.forEach(function(uuid) {
+          self._subscribers[uuid].rerun();
+        });
+
+        self.resolve();
+      }
+    }
   };
 
   return Isolation;

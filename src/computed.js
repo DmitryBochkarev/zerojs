@@ -47,6 +47,7 @@ Zero.Computed = (function() {
   };
 
   prototype.recompute = function() {
+    this.shouldRecompute = true;
     return this.get(this.lastContext);
   };
 

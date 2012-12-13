@@ -27,13 +27,6 @@ describe('Helpers', function() {
     it('run only once', function(done) {
       var i = 0;
 
-      var check = function() {
-        setTimeout(function() {
-          expect(i).to.be.equal(1);
-          done();
-        }, 1);
-      };
-
       var deferred = Zero.deferred(1, function() {
         i++;
       });
@@ -41,7 +34,11 @@ describe('Helpers', function() {
       deferred();
       deferred();
       deferred();
-      check();
+
+      setTimeout(function() {
+        expect(i).to.be.equal(1);
+        done();
+      }, 1);
     });
 
     it('should run in called context', function(done) {

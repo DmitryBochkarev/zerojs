@@ -231,7 +231,6 @@ describe('Zero.Computed', function() {
     var computed = new Zero.Computed(computeFn);
 
     computed.get(ctx)
-    computed.shouldRecompute = true;
     computed.recompute();
 
     expect(ctx.a).to.be.equal(2);
