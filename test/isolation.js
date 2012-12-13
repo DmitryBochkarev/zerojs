@@ -59,8 +59,6 @@ describe('Zero.Isolation', function() {
     var isolation = new Zero.Isolation();
     var a = 0;
     var b = 0;
-    var counterA = 0;
-    var counterB = 0;
     var ctx = {
       observableA: isolation.observable(1),
       observableB: isolation.observable(2),
@@ -71,12 +69,10 @@ describe('Zero.Isolation', function() {
         return this.observableB() + 2;
       }),
       subscribeA: isolation.subscribe(function() {
-        counterA++;
         a = this.computedA();
         this.observableB(a + 1);
       }),
       subscribeB: isolation.subscribe(function() {
-        counterB++;
         b = this.computedB();
       })
     };
@@ -88,8 +84,6 @@ describe('Zero.Isolation', function() {
     setTimeout(function() {
       expect(a).to.be.equal(3);
       expect(b).to.be.equal(5);
-      expect(counterA).to.be.equal(2);
-      expect(counterB).to.be.equal(2);
       done();
     }, 200);
   });

@@ -190,10 +190,12 @@ Zero.Isolation = (function() {
 
       if (relations.length > 0) {
         relations.forEach(function(uuid) {
-          if (self._computed[uuid]) {
-            self._computedToRecompute.add(uuid);
-          } else if (self._subscribers[uuid]) {
-            self._subscribersToRerun.add(uuid);
+          if (!self._currentContext || self._currentContext.uuid !== uuid) {
+            if (self._computed[uuid]) {
+              self._computedToRecompute.add(uuid);
+            } else if (self._subscribers[uuid]) {
+              self._subscribersToRerun.add(uuid);
+            }
           }
         });
 
