@@ -10,15 +10,15 @@ Zero.Observable = (function() {
 
   var prototype = Observable.prototype = Object.create(EventEmitter.prototype);
 
-  prototype.set = function(value) {
+  prototype.set = function(newValue) {
     var self = this;
     var oldValue = self.value;
 
     self.emit('set');
 
-    if (oldValue !== value) {
-      self.value = value;
-      self.emit('change', value, oldValue);
+    if (oldValue !== newValue) {
+      self.value = newValue;
+      self.emit('change', newValue, oldValue);
     }
 
     return self;

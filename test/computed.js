@@ -189,37 +189,6 @@ describe('Zero.Computed', function() {
     expect(changeCnt).to.be.equal(a);
   });
 
-  it('should emit `change` event between `start` and `end` events', function() {
-    var a = 0;
-    var b, c, d;
-    var computeFn = function() {
-      return null;
-    };
-    var computed = new Zero.Computed(computeFn);
-
-    computed.on('start', function() {
-      a++;
-      b = a;
-    });
-
-    computed.on('change', function() {
-      a++;
-      c = a;
-    });
-
-    computed.on('end', function() {
-      a++;
-      d = a;
-    });
-
-    computed.get();
-
-    expect(a).to.be.equal(3);
-    expect(b).to.be.equal(1);
-    expect(c).to.be.equal(2);
-    expect(d).to.be.equal(3);
-  });
-
   it('should run recompute in last context',  function() {
     var ctx = {
       a: 0

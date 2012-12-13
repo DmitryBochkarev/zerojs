@@ -34,13 +34,12 @@ Zero.Computed = (function() {
       self.emit('start');
       newValue = self.read.call(context);
       self.shouldRecompute = false;
+      self.emit('end');
 
       if (oldValue !== newValue) {
         self.value = newValue;
         self.emit('change', newValue, oldValue);
       }
-
-      self.emit('end');
     }
 
     return self.value;
