@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <script type="text/javascript" src="../dist/zero-debug.js"></script>
+  </head>
+  <body>
+    <p>Counter value: <span id="counter"></span></p>
+    <button id="btn">+1</button>
+    <script type="text/javascript">
+      var counterEl = document.getElementById('counter');
+      var buttonEl = document.getElementById('btn');
+      var app = new Zero.Isolation();
+      var counter = app.observable(0);
+      var render = app.subscribe(function() {
+        counterEl.innerText = counter();
+      });
+
+      render();
+
+      buttonEl.onclick = function() {
+        counter(counter() + 1);
+      };
+    </script>
+  </body>
+</html>

@@ -17,7 +17,7 @@ Zero.Isolation = (function() {
     self._computedToRecompute = new Set();
     self._subscribersToRerun = new Set();
 
-    self.resolve = Zero.deferred(50, this.resolve);
+    self.resolve = Zero.deferred(10, this.resolve);
   }
 
   var prototype = Isolation.prototype;
