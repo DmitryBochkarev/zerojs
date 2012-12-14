@@ -1,6 +1,4 @@
 Zero.Isolation = (function() {
-  var EventEmitter = Zero.EventEmitter;
-  var Set = Zero.Set;
   var IsolationCallContext = Zero.IsolationCallContext;
 
   function Isolation() {
@@ -14,10 +12,10 @@ Zero.Isolation = (function() {
     self._currentContext = undefined;
     self._contexts = {};
 
-    self._computedToRecompute = new Set();
-    self._subscribersToRerun = new Set();
+    self._computedToRecompute = new Zero.Set();
+    self._subscribersToRerun = new Zero.Set();
 
-    self.resolve = Zero.deferred(10, this.resolve);
+    self.resolve = Zero.deferred(10, self.resolve);
   }
 
   var prototype = Isolation.prototype;

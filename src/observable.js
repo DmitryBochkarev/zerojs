@@ -2,10 +2,12 @@ Zero.Observable = (function() {
   var EventEmitter = Zero.EventEmitter;
 
   function Observable(initialValue) {
-    EventEmitter.call(this);
+    var self = this;
 
-    this.uuid = Zero.uuid();
-    this.value = initialValue;
+    EventEmitter.call(self);
+
+    self.uuid = Zero.uuid();
+    self.value = initialValue;
   }
 
   var prototype = Observable.prototype = Object.create(EventEmitter.prototype);

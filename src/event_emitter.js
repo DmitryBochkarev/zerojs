@@ -13,7 +13,7 @@ Zero.EventEmitter = (function() {
       throw new Error('Event name must be a string');
     }
 
-    if (!(Zero.DEBUG.isFunction(handler) || (handler instanceof Zero.EventHandler))) {
+    if (!(Zero.DEBUG.isFunction(handler) || (handler instanceof EventHandler))) {
       throw new Error('Event handler must be a function or instance of EventHandler');
     }
     /*/DEBUG*/
@@ -36,7 +36,7 @@ Zero.EventEmitter = (function() {
       throw new Error('Event name must be a string');
     }
 
-    if (handler && !(Zero.DEBUG.isFunction(handler) || (handler instanceof Zero.EventHandler))) {
+    if (handler && !(Zero.DEBUG.isFunction(handler) || (handler instanceof EventHandler))) {
       throw new Error('Event handler must be a function or instance of EventHandler');
     }
     /*/DEBUG*/
@@ -74,7 +74,7 @@ Zero.EventEmitter = (function() {
       throw new Error('Event name must be a string');
     }
 
-    if (!(Zero.DEBUG.isFunction(handler) || (handler instanceof Zero.EventHandler))) {
+    if (!(Zero.DEBUG.isFunction(handler) || (handler instanceof EventHandler))) {
       throw new Error('Event handler must be a function or instance of EventHandler');
     }
     /*/DEBUG*/
@@ -101,7 +101,7 @@ Zero.EventEmitter = (function() {
       return self;
     }
 
-    args = Array.prototype.splice.call(arguments, 1);
+    args = arguments.length > 1 ? Array.prototype.splice.call(arguments, 1) : [];
 
     handlers[event] = handlers[event].filter(function(handler) {
       handler.fn.apply(self, args);

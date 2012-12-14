@@ -1,1 +1,1 @@
-})(window.Zero = {}, undefined);
+})(window.Zero = {});

@@ -1,4 +1,4 @@
-(function(Zero, undefined) {
+(function(Zero) {
 
 
 /*#DEBUG  
@@ -107,7 +107,7 @@ Zero.EventEmitter = (function() {
       throw new Error('Event name must be a string');
     }
 
-    if (!(Zero.DEBUG.isFunction(handler) || (handler instanceof Zero.EventHandler))) {
+    if (!(Zero.DEBUG.isFunction(handler) || (handler instanceof EventHandler))) {
       throw new Error('Event handler must be a function or instance of EventHandler');
     }
       /DEBUG*/
@@ -130,7 +130,7 @@ Zero.EventEmitter = (function() {
       throw new Error('Event name must be a string');
     }
 
-    if (handler && !(Zero.DEBUG.isFunction(handler) || (handler instanceof Zero.EventHandler))) {
+    if (handler && !(Zero.DEBUG.isFunction(handler) || (handler instanceof EventHandler))) {
       throw new Error('Event handler must be a function or instance of EventHandler');
     }
       /DEBUG*/
@@ -168,7 +168,7 @@ Zero.EventEmitter = (function() {
       throw new Error('Event name must be a string');
     }
 
-    if (!(Zero.DEBUG.isFunction(handler) || (handler instanceof Zero.EventHandler))) {
+    if (!(Zero.DEBUG.isFunction(handler) || (handler instanceof EventHandler))) {
       throw new Error('Event handler must be a function or instance of EventHandler');
     }
       /DEBUG*/
@@ -195,7 +195,7 @@ Zero.EventEmitter = (function() {
       return self;
     }
 
-    args = Array.prototype.splice.call(arguments, 1);
+    args = arguments.length > 1 ? Array.prototype.splice.call(arguments, 1) : [];
 
     handlers[event] = handlers[event].filter(function(handler) {
       handler.fn.apply(self, args);
@@ -213,10 +213,12 @@ Zero.Observable = (function() {
   var EventEmitter = Zero.EventEmitter;
 
   function Observable(initialValue) {
-    EventEmitter.call(this);
+    var self = this;
 
-    this.uuid = Zero.uuid();
-    this.value = initialValue;
+    EventEmitter.call(self);
+
+    self.uuid = Zero.uuid();
+    self.value = initialValue;
   }
 
   var prototype = Observable.prototype = Object.create(EventEmitter.prototype);
@@ -356,8 +358,6 @@ Zero.IsolationCallContext = (function() {
 })();
 
 Zero.Isolation = (function() {
-  var EventEmitter = Zero.EventEmitter;
-  var Set = Zero.Set;
   var IsolationCallContext = Zero.IsolationCallContext;
 
   function Isolation() {
@@ -371,10 +371,10 @@ Zero.Isolation = (function() {
     self._currentContext = undefined;
     self._contexts = {};
 
-    self._computedToRecompute = new Set();
-    self._subscribersToRerun = new Set();
+    self._computedToRecompute = new Zero.Set();
+    self._subscribersToRerun = new Zero.Set();
 
-    self.resolve = Zero.deferred(10, this.resolve);
+    self.resolve = Zero.deferred(10, self.resolve);
   }
 
   var prototype = Isolation.prototype;
@@ -580,4 +580,4 @@ Zero.Isolation = (function() {
   return Isolation;
 })();
 
-})(window.Zero = {}, undefined);
+})(window.Zero = {});
