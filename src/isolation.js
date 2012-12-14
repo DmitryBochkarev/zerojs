@@ -206,25 +206,17 @@ Zero.Isolation = (function() {
 
   prototype.resolve = function() {
     var self = this;
-    var computedToRecompute = self._computedToRecompute;
-    var subscribersToRerun = self._subscribersToRerun;
+    var computedUuid;
+    var subscriberUuid;
 
-    if (computedToRecompute.elements.length > 0) {
-      self._computedToRecompute = new Set();
+    while (self._computedToRecompute.elements.length > 0) {
+      computedUuid = self._computedToRecompute.elements.shift();
+      self._computed[computedUuid].recompute();
+    }
 
-      computedToRecompute.elements.forEach(function(uuid) {
-        self._computed[uuid].recompute();
-      });
-
-      self.resolve();
-    } else if (subscribersToRerun.elements.length > 0) {
-      self._subscribersToRerun = new Set();
-
-      subscribersToRerun.elements.forEach(function(uuid) {
-        self._subscribers[uuid].rerun();
-      });
-
-      self.resolve();
+    while (self._subscribersToRerun.elements.length > 0) {
+      subscriberUuid = self._subscribersToRerun.elements.shift();
+      self._subscribers[subscriberUuid].rerun();
     }
   };
 

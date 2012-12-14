@@ -57,33 +57,30 @@ describe('Zero.Isolation', function() {
 
   it('should detect changes when resolve', function(done) {
     var isolation = new Zero.Isolation();
-    var a = 0;
-    var b = 0;
+    var result;
     var ctx = {
       observableA: isolation.observable(1),
       observableB: isolation.observable(2),
       computedA: isolation.computed(function() {
-        return this.observableA() + 1;
+        return this.observableA();
       }),
       computedB: isolation.computed(function() {
-        return this.observableB() + 2;
+        return this.observableB();
       }),
       subscribeA: isolation.subscribe(function() {
-        a = this.computedA();
-        this.observableB(a + 1);
+        this.observableB(this.computedA());
       }),
       subscribeB: isolation.subscribe(function() {
-        b = this.computedB();
+        result = this.computedB();
       })
     };
     
     ctx.subscribeA();
     ctx.subscribeB();
-    ctx.observableA(2);
+    ctx.observableA(3);
 
     setTimeout(function() {
-      expect(a).to.be.equal(3);
-      expect(b).to.be.equal(5);
+      expect(result).to.be.equal(3);
       done();
     }, 200);
   });
