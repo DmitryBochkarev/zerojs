@@ -391,12 +391,12 @@ Zero.Isolation = (function() {
 
     isolation._observables[uuid] = observable;
     
-    observable.on('change', function() {
-      isolation.registerChanged(uuid);
-    });
-
     observable.on('get', function() {
       isolation.registerDependency(uuid);
+    });
+
+    observable.on('change', function() {
+      isolation.registerChanged(uuid);
     });
 
     function _observable(newValue) {
@@ -424,8 +424,8 @@ Zero.Isolation = (function() {
 
     isolation._computed[uuid] = computed;
 
-    computed.on('change', function() {
-      isolation.registerChanged(uuid);
+    computed.on('get', function() {
+      isolation.registerDependency(uuid);
     });
 
     computed.on('start', function() {
@@ -436,8 +436,8 @@ Zero.Isolation = (function() {
       isolation.closeContext();
     });
 
-    computed.on('get', function() {
-      isolation.registerDependency(uuid);
+    computed.on('change', function() {
+      isolation.registerChanged(uuid);
     });
     
     function _computed() {
