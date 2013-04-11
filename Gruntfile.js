@@ -1,6 +1,6 @@
 module.exports = function(grunt) {
   grunt.initConfig({
-    lint: {
+    jshint: {
       src: ['src/*.js']
     },
     concat: {
@@ -21,19 +21,19 @@ module.exports = function(grunt) {
         dest: 'dist/zero-debug.js'
       }
     },
-    min: {
+    uglify: {
       debug: {
-        src: 'dist/zero-debug.js',
+        src: ['dist/zero-debug.js'],
         dest: 'dist/zero-debug.min.js'
       },
       dist: {
-        src: 'dist/zero.js',
+        src: ['dist/zero.js'],
         dest: 'dist/zero.min.js'
       }
     },
     watch: {
-      files: ['<config:lint.src>', 'test/*'],
-      tasks: 'lint exec:test'
+      files: ['<%= jshint.src %>', 'test/*'],
+      tasks: 'jshint exec:test'
     },
     exec: {
       'build-dist': {
@@ -67,6 +67,12 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.registerTask('default', 'lint exec:test concat:debug min:debug exec:test-debug exec:test-debug-min exec:build-dist min:dist exec:test-dist exec:test-dist-min');
+  grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-exec');
+
+  grunt.registerTask('default', ['jshint', 'exec:test', 'concat:debug', 'uglify:debug',
+    'exec:test-debug', 'exec:test-debug-min', 'exec:build-dist', 'uglify:dist', 'exec:test-dist', 'exec:test-dist-min']);
 };

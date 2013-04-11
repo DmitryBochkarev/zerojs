@@ -1,18 +1,21 @@
 {
   "name": "zerojs",
   "description": "Zero",
-  "version": "0.0.0",
+  "version": "0.9.1",
   "scripts": {
-    "test": "mocha-phantomjs -R dot test/runner.html"
+    "test": "node ./node_modules/.bin/mocha-phantomjs -R dot test/runner.html"
   },
-  "dependencies": {
-
-  },
+  "dependencies": {},
   "devDependencies": {
-    "mocha": "*",
-    "mocha-phantomjs": "*",
-    "jade": "*",
-    "chai": "*",
-    "grunt-exec": "*"
+    "mocha": "~1.9.0",
+    "mocha-phantomjs": "~2.0.1",
+    "jade": "~0.28.2",
+    "chai": "~1.5.0",
+    "grunt-exec": "~0.4.0",
+    "grunt": "~0.4.1",
+    "grunt-contrib-concat": "~0.2.0",
+    "grunt-contrib-jshint": "~0.4.3",
+    "grunt-contrib-watch": "~0.3.1",
+    "grunt-contrib-uglify": "~0.2.0"
   }
 }
