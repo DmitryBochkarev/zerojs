@@ -390,7 +390,7 @@ Zero.Isolation = (function() {
     var uuid = observable.uuid;
 
     isolation._observables[uuid] = observable;
-    
+
     observable.on('get', function() {
       isolation.registerDependency(uuid);
     });
@@ -439,7 +439,7 @@ Zero.Isolation = (function() {
     computed.on('change', function() {
       isolation.registerChanged(uuid);
     });
-    
+
     function _computed() {
       return computed.get(this);
     }
@@ -470,8 +470,12 @@ Zero.Isolation = (function() {
     function _subscriber() {
       return subscriber.run(this);
     }
-    
+
     return _subscriber;
+  };
+
+  prototype.asyncBinding = function(what, context) {
+    return what;
   };
 
   prototype.setContext = function(uuid) {

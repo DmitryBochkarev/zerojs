@@ -1,4 +1,15 @@
 describe('Zero.Isolation', function() {
+  it('should return computed and observable as functions', function() {
+    var isolation = new Zero.Isolation();
+    var observable = isolation.observable(0);
+    var computed =  isolation.computed(function() {
+      return this.observable() + 1;
+    });
+
+    expect(observable).to.be.a('function');
+    expect(computed).to.be.a('function');
+  });
+
   it('should resolve computed dependencies', function(done) {
     var isolation = new Zero.Isolation();
     var a = 0;
@@ -11,7 +22,7 @@ describe('Zero.Isolation', function() {
         a = this.computed();
       })
     };
-    
+
     ctx.subscriber();
     expect(a).to.be.equal(1);
     ctx.observable(1);
@@ -42,7 +53,7 @@ describe('Zero.Isolation', function() {
         b = this.computedB();
       })
     };
-    
+
     ctx.subscribe();
     ctx.observableA(1);
     ctx.observableB(4);
@@ -74,7 +85,7 @@ describe('Zero.Isolation', function() {
         result = this.computedB();
       })
     };
-    
+
     ctx.subscribeA();
     ctx.subscribeB();
     ctx.observableA(3);
@@ -83,5 +94,49 @@ describe('Zero.Isolation', function() {
       expect(result).to.be.equal(3);
       done();
     }, 200);
+  });
+
+  it('should support asynchronous bindings', function(done) {
+    var testResult = [];
+    var pushTestResult = function(from, data) {
+      testResult.push([from, data]);
+    };
+    var isolation = new Zero.Isolation();
+    var userData = isolation.observable({name: 'User1'});
+
+    var renderFast = isolation.subscribe(function() {
+      var asyncUserData = isolation.asyncBinding(userData);
+
+      expect(asyncUserData).to.be.a('function');
+
+      setTimeout(outputInfo, 100);
+      function outputInfo() {
+        pushTestResult('renderFast', asyncUserData().name);
+      }
+    });
+
+    var renderSlow = isolation.subscribe(function() {
+      var asyncUserData = isolation.asyncBinding(userData);
+
+      expect(asyncUserData).to.be.a('function');
+
+      setTimeout(outputInfo, 500);
+      function outputInfo() {
+        pushTestResult('renderSlow', asyncUserData().name);
+      }
+    });
+
+    renderFast();
+    renderSlow();
+    userData({name: 'User2'});
+
+    setTimeout(function() {
+      userData({name: 'User3'});
+    }, 200);
+
+    setTimeout(function() {
+      expect(testResult).to.deep.equal([['renderFast', 'User2'], ['renderFast', 'User3'], ['renderSlow', 'User3']]);
+      done();
+    }, 700);
   });
 });
