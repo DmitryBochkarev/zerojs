@@ -39,30 +39,30 @@ module.exports = function(grunt) {
       'build-dist': {
         command: 'node helpers/removeDebug.js dist/zero-debug.js dist/zero.js',
         stdout: true
-      },
-      test: {
-        command: 'phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner.html dot',
-        stdout: true
-      },
+      }/*,
       "test-cov": {
         command: ' rm -rf src-cov && jscoverage src src-cov && phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner-cov.html json-cov | node helpers/cov/buildHTML.js > coverage.html',
         stdout: true
+      }  */
+    },
+    mocha_phantomjs: {
+      options: {
+        reporter: 'dot'
+      },
+      test: {
+        src: ['./test/runner.html']
       },
       "test-debug": {
-        command: 'phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner.debug.html dot',
-        stdout: true
+        src: ['./test/runner.debug.html']
       },
       "test-debug-min": {
-        command: 'phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner.debug.min.html dot',
-        stdout: true
+        src: ['/test/runner.debug-min.html']
       },
       "test-dist": {
-        command: 'phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner.dist.html dot',
-        stdout: true
+        src: ['./test/runner.dist.html']
       },
       "test-dist-min": {
-        command: 'phantomjs node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee test/runner.dist.min.html dot',
-        stdout: true
+        src: ['./test/runner.dist-min.html']
       }
     }
   });
@@ -71,8 +71,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-mocha-phantomjs');
   grunt.loadNpmTasks('grunt-exec');
 
-  grunt.registerTask('default', ['jshint', 'exec:test', 'concat:debug', 'uglify:debug',
-    'exec:test-debug', 'exec:test-debug-min', 'exec:build-dist', 'uglify:dist', 'exec:test-dist', 'exec:test-dist-min']);
+  grunt.registerTask('default', [
+    'jshint', 'mocha_phantomjs:test',
+    'concat:debug', 'uglify:debug',
+    'mocha_phantomjs:test-debug', 'mocha_phantomjs:test-debug-min', 'exec:build-dist',
+    'uglify:dist', 'mocha_phantomjs:test-dist', 'mocha_phantomjs:test-dist-min']);
 };
