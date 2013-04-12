@@ -74,7 +74,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
   grunt.loadNpmTasks('grunt-exec');
 
-  grunt.registerTask('debug', [
+  grunt.registerTask('dev', [
     'jshint',
     'mocha_phantomjs:test'
   ]);

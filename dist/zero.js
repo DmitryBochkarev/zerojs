@@ -504,24 +504,31 @@ Zero.Isolation = (function() {
   };
 
   prototype.deffer = function(binding, context) {
-    /*DEBUG*/
+    /*#DEBUG  
     if (!Zero.DEBUG.isFunction(binding)) {
       throw new Error('Binding value must be a function');
     }
       /DEBUG*/
 
-    function defferBinding() {
-      if (context) {
-        return binding.bind(context);
-      }
+    var isolation = this;
+    var currentIsolationCallContext = isolation._currentIsolationCallContext;
 
-      return binding;
+    function defferBinding() {
+      /*jshint validthis:true*/
+
+      isolation.setContext(currentIsolationCallContext.uuid, true);
+
+      var result = binding.call(context || this);
+
+      isolation.closeContext();
+
+      return result;
     }
 
     return defferBinding;
   };
 
-  prototype.setContext = function(uuid) {
+  prototype.setContext = function(uuid, saveDependencies) {
     var self = this;
     var currentContext = self._currentIsolationCallContext;
     var contexts = self._isolationCallContexts;
@@ -536,11 +543,13 @@ Zero.Isolation = (function() {
 
     currentContext = self._currentIsolationCallContext = contexts[uuid];
 
-    currentContext.dependencies.elements.forEach(function(calledUuid) {
-      self.removeRelation(uuid, calledUuid);
-    });
+    if (!saveDependencies) {
+      currentContext.dependencies.elements.forEach(function(calledUuid) {
+        self.removeRelation(uuid, calledUuid);
+      });
 
-    currentContext.dependencies.clear();
+      currentContext.dependencies.clear();
+    }
   };
 
   prototype.closeContext = function() {

@@ -96,7 +96,7 @@ describe('Zero.Isolation', function() {
     }, 200);
   });
 
-  it('should support deffered bindings', function(done) {
+  it('gh#3 should support deffered bindings#observable', function(done) {
     var testResult = [];
     var pushTestResult = function(from, data) {
       testResult.push([from, data]);
@@ -136,6 +136,40 @@ describe('Zero.Isolation', function() {
 
     setTimeout(function() {
       expect(testResult).to.deep.equal([['renderFast', 'User2'], ['renderFast', 'User3'], ['renderSlow', 'User3']]);
+      done();
+    }, 700);
+  });
+
+  it('gh#3 should support deffered bindings#computed', function(done) {
+    var testResult = [];
+    var isolation = new Zero.Isolation();
+    var user = {
+      name: isolation.observable('user1'),
+      upperName: isolation.computed(function() {
+        return this.name().toUpperCase();
+      })
+    };
+
+    var output = isolation.subscribe(function() {
+      var upperName = isolation.deffer(user.upperName, user);
+      var upperName2 = isolation.deffer(user.upperName).bind(user);
+
+      setTimeout(outputInfo, 100);
+      function outputInfo() {
+        testResult.push(upperName());
+        testResult.push(upperName2());
+      }
+    });
+
+    output();
+    user.name('user2');
+
+    setTimeout(function() {
+      user.name('user3');
+    }, 300);
+
+    setTimeout(function() {
+      expect(testResult).to.deep.equal(['USER2', 'USER2', 'USER3', 'USER3']);
       done();
     }, 700);
   });
