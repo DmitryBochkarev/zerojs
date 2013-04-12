@@ -3,6 +3,11 @@ Zero.Subscriber = (function() {
 
   var EventEmitter = Zero.EventEmitter;
 
+  /**
+   * Create Subscriber
+   * @param {Function} fn
+   * @constructor
+   */
   function Subscriber(fn) {
     /*#DEBUG*/
     if (!Zero.DEBUG.isFunction(fn)) {
@@ -21,6 +26,11 @@ Zero.Subscriber = (function() {
 
   var prototype = Subscriber.prototype = Object.create(EventEmitter.prototype);
 
+  /**
+   * Run subscriber
+   * @param context
+   * @returns {*} context
+   */
   prototype.run = function(context) {
     var self = this;
 
@@ -33,6 +43,10 @@ Zero.Subscriber = (function() {
     return context;
   };
 
+  /**
+   * Rerun subscriber in last context
+   * @returns {*} context
+   */
   prototype.rerun = function() {
     return this.run(this.lastContext);
   };

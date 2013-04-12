@@ -1,6 +1,11 @@
 Zero.IsolationCallContext = (function() {
   "use strict";
 
+  /**
+   * Create IsolationCallContext
+   * @param uuid
+   * @constructor
+   */
   function IsolationCallContext(uuid) {
     /*#DEBUG*/
     if (!uuid) {

@@ -3,9 +3,14 @@ Zero.Computed = (function() {
 
   var EventEmitter = Zero.EventEmitter;
 
-  function Computed(readComputeFn) {
+  /**
+   * Create Computed
+   * @param {Function} computeFn
+   * @constructor
+   */
+  function Computed(computeFn) {
     /*#DEBUG*/
-    if (!Zero.DEBUG.isFunction(readComputeFn)) {
+    if (!Zero.DEBUG.isFunction(computeFn)) {
       throw new Error('Computed should be a function');
     }
     /*/DEBUG*/
@@ -15,14 +20,20 @@ Zero.Computed = (function() {
     EventEmitter.call(self);
 
     self.uuid = Zero.uuid();
-    self.read = readComputeFn;
+    self._computeFn = computeFn;
     self.value = undefined;
-    self.shouldRecompute = true;
+    self._shouldRecompute = true;
     self.lastContext = undefined;
   }
 
   var prototype = Computed.prototype = Object.create(EventEmitter.prototype);
 
+  /**
+   * Return computed value, recompute if should.
+   * @lends Computed.prototype
+   * @param context
+   * @returns {*} value
+   */
   prototype.get = function(context) {
     var self = this;
     var oldValue = self.value;
@@ -32,10 +43,10 @@ Zero.Computed = (function() {
 
     self.emit('get');
 
-    if (self.shouldRecompute) {
+    if (self._shouldRecompute) {
       self.emit('start');
-      newValue = self.read.call(context);
-      self.shouldRecompute = false;
+      newValue = self._computeFn.call(context);
+      self._shouldRecompute = false;
       self.emit('end');
 
       if (oldValue !== newValue) {
@@ -47,8 +58,12 @@ Zero.Computed = (function() {
     return self.value;
   };
 
+  /**
+   * Force to recompute return computed value.
+   * @returns {*} value
+   */
   prototype.recompute = function() {
-    this.shouldRecompute = true;
+    this._shouldRecompute = true;
     return this.get(this.lastContext);
   };
 

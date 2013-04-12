@@ -3,6 +3,10 @@ Zero.Isolation = (function() {
 
   var IsolationCallContext = Zero.IsolationCallContext;
 
+  /**
+   * Create Isolation
+   * @constructor
+   */
   function Isolation() {
     var self = this;
 
@@ -22,23 +26,35 @@ Zero.Isolation = (function() {
 
   var prototype = Isolation.prototype;
 
+  /**
+   * Create and register observable to isolation
+   * @lends Isolation.prototype
+   * @param initialValue
+   * @returns {Function} observable
+   */
   prototype.observable = function(initialValue) {
     var observable = new Zero.Observable(initialValue);
 
     return this.registerObservable(observable);
   };
 
-  prototype.registerObservable = function(observable) {
+  /**
+   * Register observableInstance to isolation
+   * @lends Isolation.prototype
+   * @param {Observable} observableInstance
+   * @returns {Function} observable
+   */
+  prototype.registerObservable = function(observableInstance) {
     var isolation = this;
-    var uuid = observable.uuid;
+    var uuid = observableInstance.uuid;
 
-    isolation._observables[uuid] = observable;
+    isolation._observables[uuid] = observableInstance;
 
-    observable.on('get', function() {
+    observableInstance.on('get', function() {
       isolation.registerDependency(uuid);
     });
 
-    observable.on('change', function() {
+    observableInstance.on('change', function() {
       isolation.registerChanged(uuid);
     });
 
@@ -46,49 +62,61 @@ Zero.Isolation = (function() {
       /*jshint validthis:true*/
 
       if (arguments.length > 0) {
-        observable.set(newValue);
+        observableInstance.set(newValue);
 
         return this;
       } else {
-        return observable.get();
+        return observableInstance.get();
       }
     }
 
     return _observable;
   };
 
+  /**
+   * Create and register computed to isolation
+   * @lends Isolation.prototype
+   * @param {Function} computeFn
+   * @returns {Function} computed
+   */
   prototype.computed = function(computeFn) {
     var computed = new Zero.Computed(computeFn);
 
     return this.registerComputed(computed);
   };
 
-  prototype.registerComputed = function(computed) {
+  /**
+   * Register computedInstance to isolation
+   * @lends Isolation.prototype
+   * @param {Computed} computedInstance
+   * @returns {Function} computed
+   */
+  prototype.registerComputed = function(computedInstance) {
     var isolation = this;
-    var uuid = computed.uuid;
+    var uuid = computedInstance.uuid;
 
-    isolation._computed[uuid] = computed;
+    isolation._computed[uuid] = computedInstance;
 
-    computed.on('get', function() {
+    computedInstance.on('get', function() {
       isolation.registerDependency(uuid);
     });
 
-    computed.on('start', function() {
+    computedInstance.on('start', function() {
       isolation.setContext(uuid);
     });
 
-    computed.on('end', function() {
+    computedInstance.on('end', function() {
       isolation.closeContext();
     });
 
-    computed.on('change', function() {
+    computedInstance.on('change', function() {
       isolation.registerChanged(uuid);
     });
 
     function _computed() {
       /*jshint validthis:true*/
 
-      return computed.get(this);
+      return computedInstance.get(this);
     }
 
     return _computed;

@@ -77,7 +77,7 @@ describe('Zero.Computed', function() {
     expect(a).to.be.equal(1);
   });
 
-  it('should emit `start/end` event when shouldRecompute positive', function() {
+  it('should emit `start/end` event when _shouldRecompute positive', function() {
     var a = 0
     var computeCnt = 0;
     var computeFn = function() {
@@ -92,7 +92,7 @@ describe('Zero.Computed', function() {
 
     computed.get();
     computed.get();
-    computed.shouldRecompute = true;
+    computed._shouldRecompute = true;
     computed.get();
     computed.get();
 
@@ -112,7 +112,7 @@ describe('Zero.Computed', function() {
     var computed = new Zero.Computed(computeFn);
 
     b = computed.get();
-    computed.shouldRecompute = true;
+    computed._shouldRecompute = true;
     c = computed.get();
 
     expect(a).to.be.equal(1);
@@ -137,7 +137,7 @@ describe('Zero.Computed', function() {
     var computed = new Zero.Computed(computeFn);
 
     b1 = computed.get(ctx1);
-    computed.shouldRecompute = true;
+    computed._shouldRecompute = true;
     b2 = computed.get(ctx2);
 
     expect(ctx1.a).to.be.equal(1);
@@ -158,7 +158,7 @@ describe('Zero.Computed', function() {
     });
 
     computed.get();
-    computed.shouldRecompute = true;
+    computed._shouldRecompute = true;
     computed.get();
 
     expect(a).to.be.equal(1);
@@ -180,7 +180,7 @@ describe('Zero.Computed', function() {
     });
 
     b = computed.get();
-    computed.shouldRecompute = true;
+    computed._shouldRecompute = true;
     c = computed.get();
 
     expect(a).to.be.equal(2);

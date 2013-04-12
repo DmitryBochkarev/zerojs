@@ -1,5 +1,7 @@
 /*#DEBUG*/
+
 if (!window.Zero) {
+  /** @global */
   window.Zero = {};
 }
 
@@ -14,8 +16,17 @@ Zero.DEBUG = {};
 });
 /*/DEBUG*/
 
-Zero.noop = function(val) { return val; };
+/**
+ * Does nothing just return passing value
+ * @param {*} [value]
+ * @returns value
+ */
+Zero.noop = function(value) { return value; };
 
+/**
+ * Generate unique number
+ * @returns {Integer} uuid
+ */
 Zero.uuid = (function() {
   "use strict";
 
@@ -27,6 +38,17 @@ Zero.uuid = (function() {
   };
 })();
 
+/**
+ * Milleseconds
+ * @typedef {Integer} Milliseconds
+ */
+
+/**
+ * Return function that deffer execution by wait time
+ * @param {Milliseconds} wait
+ * @param {Function} fn
+ * @returns {Function}
+ */
 Zero.deferred = function(wait, fn) {
   "use strict";
 

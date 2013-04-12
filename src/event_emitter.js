@@ -3,12 +3,23 @@ Zero.EventEmitter = (function() {
 
   var EventHandler = Zero.EventHandler;
 
+  /**
+   * EventEmitter
+   * @constructor
+   */
   function EventEmitter() {
     this._handlers = {};
   }
 
   var prototype = EventEmitter.prototype;
 
+  /**
+   * Register handler for event
+   * @lends EventEmitter.prototype
+   * @param {String} event
+   * @param {Function|EventHandler} handler
+   * @returns {EventEmitter} instance
+   */
   prototype.on = function(event, handler) {
     /*#DEBUG*/
     if (!Zero.DEBUG.isString(event)) {
@@ -32,6 +43,13 @@ Zero.EventEmitter = (function() {
     return this;
   };
 
+  /**
+   * Remove handler for event if handler passed or remove all handlers for event if event passed or remove all handlers for instance
+   * @lends EventEmitter.prototype
+   * @param {String} [event]
+   * @param {Function|EventHandler} [handler]
+   * @returns {EventEmitter} instance
+   */
   prototype.off = function(event, handler) {
     /*#DEBUG*/
     if (event && !Zero.DEBUG.isString(event)) {
@@ -70,6 +88,13 @@ Zero.EventEmitter = (function() {
     return self;
   };
 
+  /**
+   * Register onefire handler for event
+   * @lends EventEmitter.prototype
+   * @param {String} event
+   * @param {Function|EventHandler} handler
+   * @returns {EventEmitter} instance
+   */
   prototype.once = function(event, handler) {
     /*#DEBUG*/
     if (!Zero.DEBUG.isString(event)) {
@@ -86,6 +111,13 @@ Zero.EventEmitter = (function() {
     return this.on(event, eventHandler);
   };
 
+  /**
+   * Fire event with params
+   * @lends EventEmitter.prototype
+   * @param {String} event
+   * @param {...*} ...params
+   * @returns {EventEmitter} instance
+   */
   prototype.emit = function() {
     var event = arguments[0];
 
