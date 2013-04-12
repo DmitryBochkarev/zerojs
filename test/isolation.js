@@ -96,7 +96,7 @@ describe('Zero.Isolation', function() {
     }, 200);
   });
 
-  it('should support asynchronous bindings', function(done) {
+  it('should support deffered bindings', function(done) {
     var testResult = [];
     var pushTestResult = function(from, data) {
       testResult.push([from, data]);
@@ -105,7 +105,7 @@ describe('Zero.Isolation', function() {
     var userData = isolation.observable({name: 'User1'});
 
     var renderFast = isolation.subscribe(function() {
-      var asyncUserData = isolation.asyncBinding(userData);
+      var asyncUserData = isolation.deffer(userData);
 
       expect(asyncUserData).to.be.a('function');
 
@@ -116,7 +116,7 @@ describe('Zero.Isolation', function() {
     });
 
     var renderSlow = isolation.subscribe(function() {
-      var asyncUserData = isolation.asyncBinding(userData);
+      var asyncUserData = isolation.deffer(userData);
 
       expect(asyncUserData).to.be.a('function');
 

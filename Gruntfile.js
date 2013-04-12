@@ -74,9 +74,15 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
   grunt.loadNpmTasks('grunt-exec');
 
+  grunt.registerTask('debug', [
+    'jshint',
+    'mocha_phantomjs:test'
+  ]);
+
   grunt.registerTask('default', [
     'jshint', 'mocha_phantomjs:test',
     'concat:debug', 'uglify:debug',
     'mocha_phantomjs:test-debug', 'mocha_phantomjs:test-debug-min', 'exec:build-dist',
-    'uglify:dist', 'mocha_phantomjs:test-dist', 'mocha_phantomjs:test-dist-min']);
+    'uglify:dist', 'mocha_phantomjs:test-dist', 'mocha_phantomjs:test-dist-min'
+  ]);
 };

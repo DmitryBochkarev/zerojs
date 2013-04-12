@@ -1,4 +1,6 @@
 Zero.Set = (function() {
+  "use strict";
+
   function Set(elements) {
     /*#DEBUG*/
     if (elements && !Array.isArray(elements)) {
@@ -8,7 +10,7 @@ Zero.Set = (function() {
 
     this.elements = elements || [];
   }
-  
+
   var prototype = Set.prototype;
 
   prototype.has = function(element) {

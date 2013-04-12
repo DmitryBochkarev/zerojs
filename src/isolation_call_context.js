@@ -1,4 +1,6 @@
 Zero.IsolationCallContext = (function() {
+  "use strict";
+
   function IsolationCallContext(uuid) {
     /*#DEBUG*/
     if (!uuid) {

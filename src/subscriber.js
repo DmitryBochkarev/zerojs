@@ -1,4 +1,6 @@
 Zero.Subscriber = (function() {
+  "use strict";
+
   var EventEmitter = Zero.EventEmitter;
 
   function Subscriber(fn) {
@@ -21,7 +23,7 @@ Zero.Subscriber = (function() {
 
   prototype.run = function(context) {
     var self = this;
-    
+
     self.lastContext = context;
 
     self.emit('start');

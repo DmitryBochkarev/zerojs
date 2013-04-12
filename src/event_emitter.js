@@ -1,10 +1,12 @@
 Zero.EventEmitter = (function() {
+  "use strict";
+
   var EventHandler = Zero.EventHandler;
 
   function EventEmitter() {
     this._handlers = {};
   }
-  
+
   var prototype = EventEmitter.prototype;
 
   prototype.on = function(event, handler) {
@@ -23,10 +25,10 @@ Zero.EventEmitter = (function() {
 
     if (!handlers[event]) {
       handlers[event] = [];
-    }  
+    }
 
     handlers[event].push(eventHandler);
-    
+
     return this;
   };
 
@@ -80,7 +82,7 @@ Zero.EventEmitter = (function() {
     /*/DEBUG*/
 
     var eventHandler = new EventHandler((handler instanceof EventHandler ? handler.fn : handler), true);
-    
+
     return this.on(event, eventHandler);
   };
 

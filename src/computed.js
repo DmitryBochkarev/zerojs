@@ -1,4 +1,6 @@
 Zero.Computed = (function() {
+  "use strict";
+
   var EventEmitter = Zero.EventEmitter;
 
   function Computed(readComputeFn) {

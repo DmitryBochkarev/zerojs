@@ -1,13 +1,15 @@
 /*#DEBUG*/
 if (!window.Zero) {
-  Zero = {};
+  window.Zero = {};
 }
 
 Zero.DEBUG = {};
 
 ['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'].forEach(function(name) {
+  "use strict";
+
   Zero.DEBUG['is' + name] = function(obj) {
-    return Object.prototype.toString.call(obj) == '[object ' + name + ']';
+    return Object.prototype.toString.call(obj) === '[object ' + name + ']';
   };
 });
 /*/DEBUG*/
@@ -15,14 +17,19 @@ Zero.DEBUG = {};
 Zero.noop = function(val) { return val; };
 
 Zero.uuid = (function() {
+  "use strict";
+
   var i = 1;
 
   return function () {
-    return i++;
+    i++;
+    return i;
   };
 })();
 
 Zero.deferred = function(wait, fn) {
+  "use strict";
+
   var timer;
 
   return function () {

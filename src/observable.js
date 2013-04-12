@@ -1,4 +1,6 @@
 Zero.Observable = (function() {
+  "use strict";
+
   var EventEmitter = Zero.EventEmitter;
 
   function Observable(initialValue) {

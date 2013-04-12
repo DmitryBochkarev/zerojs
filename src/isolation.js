@@ -1,4 +1,6 @@
 Zero.Isolation = (function() {
+  "use strict";
+
   var IsolationCallContext = Zero.IsolationCallContext;
 
   function Isolation() {
@@ -9,8 +11,8 @@ Zero.Isolation = (function() {
     self._subscribers = {};
 
     self._callStack = [];
-    self._currentContext = undefined;
-    self._contexts = {};
+    self._currentIsolationCallContext = undefined;
+    self._isolationCallContexts = {};
 
     self._computedToRecompute = new Zero.Set();
     self._subscribersToRerun = new Zero.Set();
@@ -41,6 +43,8 @@ Zero.Isolation = (function() {
     });
 
     function _observable(newValue) {
+      /*jshint validthis:true*/
+
       if (arguments.length > 0) {
         observable.set(newValue);
 
@@ -82,6 +86,8 @@ Zero.Isolation = (function() {
     });
 
     function _computed() {
+      /*jshint validthis:true*/
+
       return computed.get(this);
     }
 
@@ -109,25 +115,36 @@ Zero.Isolation = (function() {
     });
 
     function _subscriber() {
+      /*jshint validthis:true*/
+
       return subscriber.run(this);
     }
 
     return _subscriber;
   };
 
-  prototype.asyncBinding = function(binding, context) {
+  prototype.deffer = function(binding, context) {
     /*DEBUG*/
     if (!Zero.DEBUG.isFunction(binding)) {
       throw new Error('Binding value must be a function');
     }
     /*/DEBUG*/
-    return binding;
+
+    function defferBinding() {
+      if (context) {
+        return binding.bind(context);
+      }
+
+      return binding;
+    }
+
+    return defferBinding;
   };
 
   prototype.setContext = function(uuid) {
     var self = this;
-    var currentContext = self._currentContext;
-    var contexts = self._contexts;
+    var currentContext = self._currentIsolationCallContext;
+    var contexts = self._isolationCallContexts;
 
     if (currentContext) {
       self._callStack.unshift(currentContext);
@@ -137,7 +154,7 @@ Zero.Isolation = (function() {
       contexts[uuid] = new IsolationCallContext(uuid);
     }
 
-    currentContext = self._currentContext = contexts[uuid];
+    currentContext = self._currentIsolationCallContext = contexts[uuid];
 
     currentContext.dependencies.elements.forEach(function(calledUuid) {
       self.removeRelation(uuid, calledUuid);
@@ -147,11 +164,11 @@ Zero.Isolation = (function() {
   };
 
   prototype.closeContext = function() {
-    this._currentContext = this._callStack.shift();
+    this._currentIsolationCallContext = this._callStack.shift();
   };
 
   prototype.registerDependency = function(uuid) {
-    var currentContext = this._currentContext;
+    var currentContext = this._currentIsolationCallContext;
 
     if (currentContext) {
       /*#DEBUG*/
@@ -166,7 +183,7 @@ Zero.Isolation = (function() {
   };
 
   prototype.registerRelation = function(callerUuid, calledUuid) {
-    var contexts = this._contexts;
+    var contexts = this._isolationCallContexts;
 
     if (!contexts[calledUuid]) {
       contexts[calledUuid] = new IsolationCallContext(calledUuid);
@@ -182,14 +199,14 @@ Zero.Isolation = (function() {
   };
 
   prototype.removeRelation = function(callerUuid, calledUuid) {
-    var context = this._contexts[calledUuid];
+    var context = this._isolationCallContexts[calledUuid];
 
     context.relations.remove(callerUuid);
   };
 
   prototype.registerChanged = function(uuid) {
     var self = this ;
-    var context = self._contexts[uuid];
+    var context = self._isolationCallContexts[uuid];
     var relations;
 
     if (context) {
@@ -197,7 +214,7 @@ Zero.Isolation = (function() {
 
       if (relations.length > 0) {
         relations.forEach(function(uuid) {
-          if (!self._currentContext || self._currentContext.uuid !== uuid) {
+          if (!self._currentIsolationCallContext || self._currentIsolationCallContext.uuid !== uuid) {
             if (self._computed[uuid]) {
               self._computedToRecompute.add(uuid);
             } else if (self._subscribers[uuid]) {

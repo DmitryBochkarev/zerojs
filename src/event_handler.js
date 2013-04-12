@@ -1,4 +1,6 @@
 Zero.EventHandler = (function() {
+  "use strict";
+
   function EventHandler(fn, once) {
     /*#DEBUG*/
     if (typeof fn !== 'function') {
