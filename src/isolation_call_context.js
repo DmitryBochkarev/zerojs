@@ -3,17 +3,17 @@ Zero.IsolationCallContext = (function() {
 
   /**
    * Create IsolationCallContext
-   * @param uuid
+   * @param id
    * @constructor
    */
-  function IsolationCallContext(uuid) {
+  function IsolationCallContext(id) {
     /*#DEBUG*/
-    if (!uuid) {
-      throw new Error('uuid must present');
+    if (!id) {
+      throw new Error('id must present');
     }
     /*/DEBUG*/
 
-    this.uuid = uuid;
+    this.id = id;
     this.dependencies = new Zero.Set();
     this.relations = new Zero.Set();
   }

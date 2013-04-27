@@ -8,14 +8,14 @@ describe('Helpers', function() {
     });
   });
 
-  describe('uuid', function() {
+  describe('id', function() {
     it('present', function() {
-      expect(Zero.uuid).to.not.be.undefined;
+      expect(Zero.id).to.not.be.undefined;
     });
       
-    it('generate unique uuid every time', function() {
-      var a = Zero.uuid();
-      var b = Zero.uuid();
+    it('generate unique id every time', function() {
+      var a = Zero.id();
+      var b = Zero.id();
 
       expect(a).to.not.be.undefined;
       expect(b).to.not.be.undefined;

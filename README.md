@@ -3,33 +3,36 @@
 Sometimes you just need simple dependencies detections system.
 That is all.
 
-##Documentation
+##Example
 
-###Helpers
+`cat example/counter.html`
 
-*noop()* just return pssing value.
-*uuid()* generate unique number.
-*deffered(delay, function)* call function once in delay interval, every next call reset timeout. Call context saved.
+```html
+<!doctype html>
+<html>
+  <head>
+    <script type="text/javascript" src="../dist/zero-debug.js"></script>
+  </head>
+  <body>
+    <div id="counter"></div>
+    <script type="text/javascript">
+      var counterEl = document.getElementById('counter');
+      var app = new Zero.Isolation();
+      var counter = app.observable(1);
+      var view = app.computed(function() {
+        return "<p>Counter value:  <strong>" + counter() + "</strong>!</p>";
+      });
+      var render = app.subscribe(function() {
+        var html = view();
+        counterEl.innerHTML = html;
+      });
 
-###Set(initialCollection)
+      render();
 
-Create set of unique elements.
-*add(element)* add element in set.
-*has(element)* return true if collection has passing element.
-*remove(element)* remove passing element from set.
-*clear()* remove all elements from collection.
-*elements* array of set elements.
-
-###EventHandler(function, runOnce)
-
-This class used by event emitter.
-
-###EventEmmiter()
-
-*on(eventName, handler)* register `handler` to `eventName` event.
-*once(eventName, handler)* register `handler` to `eventName` event after first call of event hadler remove from collection.
-*off(
-
-
-
-
+      setInterval(function() {
+        counter(counter() + 1);
+      }, 1000);
+    </script>
+  </body>
+</html>
+```

@@ -13,10 +13,10 @@ describe('Zero.Observable', function() {
     expect(observable).to.be.an.instanceof(Zero.EventEmitter);
   });
 
-  it('should have unique uuid', function() {
+  it('should have unique id', function() {
     var observable2 = new Zero.Observable();
 
-    expect(observable.uuid).to.not.be.equal(observable2.uuid);
+    expect(observable.id).to.not.be.equal(observable2.id);
   });
 
   it('should save value', function() {

@@ -2,11 +2,12 @@
 
 
 /*#DEBUG*/
+
 if (!window.Zero) {
   window.Zero = {};
 }
 
-Zero.DEBUG = {};
+window.Zero.DEBUG = {};
 
 ['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'].forEach(function(name) {
   "use strict";
@@ -17,9 +18,18 @@ Zero.DEBUG = {};
 });
 /*/DEBUG*/
 
-Zero.noop = function(val) { return val; };
+/**
+ * Does nothing just return passing value
+ * @param {*} [value]
+ * @returns passed value
+ */
+Zero.noop = function(value) { return value; };
 
-Zero.uuid = (function() {
+/**
+ * Generate unique number
+ * @returns {Integer} id
+ */
+Zero.id = (function() {
   "use strict";
 
   var i = 1;
@@ -30,6 +40,17 @@ Zero.uuid = (function() {
   };
 })();
 
+/**
+ * Milleseconds
+ * @typedef {Integer} Milliseconds
+ */
+
+/**
+ * Return function that deffer execution by wait time
+ * @param {Milliseconds} wait
+ * @param {Function} fn
+ * @returns {Function} deffered function
+ */
 Zero.deferred = function(wait, fn) {
   "use strict";
 
@@ -47,7 +68,16 @@ Zero.deferred = function(wait, fn) {
 
 Zero.Set = (function() {
   "use strict";
+  /**
+   * Set element
+   * @typedef {*} SetElement
+   */
 
+  /**
+   * Create collection of unique elements
+   * @param {...SetElement} elements
+   * @constructor
+   */
   function Set(elements) {
     /*#DEBUG*/
     if (elements && !Array.isArray(elements)) {
@@ -55,21 +85,38 @@ Zero.Set = (function() {
     }
     /*/DEBUG*/
 
+    /** @member {..SetElement} */
     this.elements = elements || [];
   }
 
   var prototype = Set.prototype;
 
+  /**
+   * Check if element present in Set
+   * @lends Set.prototype
+   * @param {SetElement} element
+   * @returns {boolean}
+   */
   prototype.has = function(element) {
     return (this.elements.indexOf(element) >= 0);
   };
 
+  /**
+   * Add element to set
+   * @lends Set.prototype
+   * @param {SetElement} element
+   */
   prototype.add = function(element) {
     if (!this.has(element)) {
       this.elements.push(element);
     }
   };
 
+  /**
+   * Remove elements from set
+   * @lends Set.prototype
+   * @param {SetElement} element
+   */
   prototype.remove = function(element) {
     var index = this.elements.indexOf(element);
 
@@ -78,6 +125,10 @@ Zero.Set = (function() {
     }
   };
 
+  /**
+   * Remove all elements from set
+   * @lends Set.prototype
+   */
   prototype.clear = function() {
     this.elements = [];
   };
@@ -88,14 +139,20 @@ Zero.Set = (function() {
 Zero.EventHandler = (function() {
   "use strict";
 
-  function EventHandler(fn, once) {
+  /**
+   * EventHandler
+   * @param {Function} handler
+   * @param {Boolean} once
+   * @constructor
+   */
+  function EventHandler(handler, once) {
     /*#DEBUG*/
-    if (typeof fn !== 'function') {
+    if (typeof handler !== 'function') {
       throw new Error('Event handler must be a function');
     }
     /*/DEBUG*/
 
-    this.fn = fn;
+    this.fn = handler;
     this.once = !!once;
   }
 
@@ -108,12 +165,23 @@ Zero.EventEmitter = (function() {
 
   var EventHandler = Zero.EventHandler;
 
+  /**
+   * EventEmitter
+   * @constructor
+   */
   function EventEmitter() {
     this._handlers = {};
   }
 
   var prototype = EventEmitter.prototype;
 
+  /**
+   * Register handler for event
+   * @lends EventEmitter.prototype
+   * @param {String} event
+   * @param {Function|EventHandler} handler
+   * @returns {EventEmitter} instance
+   */
   prototype.on = function(event, handler) {
     /*#DEBUG*/
     if (!Zero.DEBUG.isString(event)) {
@@ -137,6 +205,13 @@ Zero.EventEmitter = (function() {
     return this;
   };
 
+  /**
+   * Remove handler for event if handler passed or remove all handlers for event if event passed or remove all handlers for instance
+   * @lends EventEmitter.prototype
+   * @param {String} [event]
+   * @param {Function|EventHandler} [handler]
+   * @returns {EventEmitter} instance
+   */
   prototype.off = function(event, handler) {
     /*#DEBUG*/
     if (event && !Zero.DEBUG.isString(event)) {
@@ -175,6 +250,13 @@ Zero.EventEmitter = (function() {
     return self;
   };
 
+  /**
+   * Register onefire handler for event
+   * @lends EventEmitter.prototype
+   * @param {String} event
+   * @param {Function|EventHandler} handler
+   * @returns {EventEmitter} instance
+   */
   prototype.once = function(event, handler) {
     /*#DEBUG*/
     if (!Zero.DEBUG.isString(event)) {
@@ -191,6 +273,13 @@ Zero.EventEmitter = (function() {
     return this.on(event, eventHandler);
   };
 
+  /**
+   * Fire event with params
+   * @lends EventEmitter.prototype
+   * @param {String} event
+   * @param {...*} ...params
+   * @returns {EventEmitter} instance
+   */
   prototype.emit = function() {
     var event = arguments[0];
 
@@ -227,17 +316,28 @@ Zero.Observable = (function() {
 
   var EventEmitter = Zero.EventEmitter;
 
+  /**
+   * Create observable value
+   * @param initialValue
+   * @constructor
+   */
   function Observable(initialValue) {
     var self = this;
 
     EventEmitter.call(self);
 
-    self.uuid = Zero.uuid();
+    self.id = Zero.id();
     self.value = initialValue;
   }
 
   var prototype = Observable.prototype = Object.create(EventEmitter.prototype);
 
+  /**
+   * Set new value to observable
+   * @lends Observable.prototype
+   * @param {*} newValue
+   * @returns {Observable} instance
+   */
   prototype.set = function(newValue) {
     var self = this;
     var oldValue = self.value;
@@ -252,6 +352,10 @@ Zero.Observable = (function() {
     return self;
   };
 
+  /**
+   * @lends Observable.prototype
+   * @returns value of observable
+   */
   prototype.get = function() {
     this.emit('get');
 
@@ -266,9 +370,14 @@ Zero.Computed = (function() {
 
   var EventEmitter = Zero.EventEmitter;
 
-  function Computed(readComputeFn) {
+  /**
+   * Create Computed
+   * @param {Function} computeFn
+   * @constructor
+   */
+  function Computed(computeFn) {
     /*#DEBUG*/
-    if (!Zero.DEBUG.isFunction(readComputeFn)) {
+    if (!Zero.DEBUG.isFunction(computeFn)) {
       throw new Error('Computed should be a function');
     }
     /*/DEBUG*/
@@ -277,15 +386,21 @@ Zero.Computed = (function() {
 
     EventEmitter.call(self);
 
-    self.uuid = Zero.uuid();
-    self.read = readComputeFn;
+    self.id = Zero.id();
+    self._computeFn = computeFn;
     self.value = undefined;
-    self.shouldRecompute = true;
+    self._shouldRecompute = true;
     self.lastContext = undefined;
   }
 
   var prototype = Computed.prototype = Object.create(EventEmitter.prototype);
 
+  /**
+   * Return computed value, recompute if should.
+   * @lends Computed.prototype
+   * @param context
+   * @returns {*} value
+   */
   prototype.get = function(context) {
     var self = this;
     var oldValue = self.value;
@@ -295,10 +410,10 @@ Zero.Computed = (function() {
 
     self.emit('get');
 
-    if (self.shouldRecompute) {
+    if (self._shouldRecompute) {
       self.emit('start');
-      newValue = self.read.call(context);
-      self.shouldRecompute = false;
+      newValue = self._computeFn.call(context);
+      self._shouldRecompute = false;
       self.emit('end');
 
       if (oldValue !== newValue) {
@@ -310,8 +425,12 @@ Zero.Computed = (function() {
     return self.value;
   };
 
+  /**
+   * Force to recompute return computed value.
+   * @returns {*} value
+   */
   prototype.recompute = function() {
-    this.shouldRecompute = true;
+    this._shouldRecompute = true;
     return this.get(this.lastContext);
   };
 
@@ -323,6 +442,11 @@ Zero.Subscriber = (function() {
 
   var EventEmitter = Zero.EventEmitter;
 
+  /**
+   * Create Subscriber
+   * @param {Function} fn
+   * @constructor
+   */
   function Subscriber(fn) {
     /*#DEBUG*/
     if (!Zero.DEBUG.isFunction(fn)) {
@@ -334,13 +458,18 @@ Zero.Subscriber = (function() {
 
     EventEmitter.call(self);
 
-    self.uuid = Zero.uuid();
+    self.id = Zero.id();
     self.fn = fn;
     self.lastContext = undefined;
   }
 
   var prototype = Subscriber.prototype = Object.create(EventEmitter.prototype);
 
+  /**
+   * Run subscriber
+   * @param context
+   * @returns {*} context
+   */
   prototype.run = function(context) {
     var self = this;
 
@@ -353,6 +482,10 @@ Zero.Subscriber = (function() {
     return context;
   };
 
+  /**
+   * Rerun subscriber in last context
+   * @returns {*} context
+   */
   prototype.rerun = function() {
     return this.run(this.lastContext);
   };
@@ -363,14 +496,19 @@ Zero.Subscriber = (function() {
 Zero.IsolationCallContext = (function() {
   "use strict";
 
-  function IsolationCallContext(uuid) {
+  /**
+   * Create IsolationCallContext
+   * @param id
+   * @constructor
+   */
+  function IsolationCallContext(id) {
     /*#DEBUG*/
-    if (!uuid) {
-      throw new Error('uuid must present');
+    if (!id) {
+      throw new Error('id must present');
     }
     /*/DEBUG*/
 
-    this.uuid = uuid;
+    this.id = id;
     this.dependencies = new Zero.Set();
     this.relations = new Zero.Set();
   }
@@ -383,6 +521,10 @@ Zero.Isolation = (function() {
 
   var IsolationCallContext = Zero.IsolationCallContext;
 
+  /**
+   * Create Isolation
+   * @constructor
+   */
   function Isolation() {
     var self = this;
 
@@ -402,73 +544,97 @@ Zero.Isolation = (function() {
 
   var prototype = Isolation.prototype;
 
+  /**
+   * Create and register observable to isolation
+   * @lends Isolation.prototype
+   * @param initialValue
+   * @returns {Function} observable
+   */
   prototype.observable = function(initialValue) {
     var observable = new Zero.Observable(initialValue);
 
     return this.registerObservable(observable);
   };
 
-  prototype.registerObservable = function(observable) {
+  /**
+   * Register observableInstance to isolation
+   * @lends Isolation.prototype
+   * @param {Observable} observableInstance
+   * @returns {Function} observable
+   */
+  prototype.registerObservable = function(observableInstance) {
     var isolation = this;
-    var uuid = observable.uuid;
+    var id = observableInstance.id;
 
-    isolation._observables[uuid] = observable;
+    isolation._observables[id] = observableInstance;
 
-    observable.on('get', function() {
-      isolation.registerDependency(uuid);
+    observableInstance.on('get', function() {
+      isolation.registerDependency(id);
     });
 
-    observable.on('change', function() {
-      isolation.registerChanged(uuid);
+    observableInstance.on('change', function() {
+      isolation.registerChanged(id);
     });
 
     function _observable(newValue) {
       /*jshint validthis:true*/
 
       if (arguments.length > 0) {
-        observable.set(newValue);
+        observableInstance.set(newValue);
 
         return this;
       } else {
-        return observable.get();
+        return observableInstance.get();
       }
     }
 
     return _observable;
   };
 
+  /**
+   * Create and register computed to isolation
+   * @lends Isolation.prototype
+   * @param {Function} computeFn
+   * @returns {Function} computed
+   */
   prototype.computed = function(computeFn) {
     var computed = new Zero.Computed(computeFn);
 
     return this.registerComputed(computed);
   };
 
-  prototype.registerComputed = function(computed) {
+  /**
+   * Register computedInstance to isolation
+   * @lends Isolation.prototype
+   * @param {Computed} computedInstance
+   * @returns {Function} computed
+   */
+  prototype.registerComputed = function(computedInstance) {
     var isolation = this;
-    var uuid = computed.uuid;
+    var id = computedInstance.id;
 
-    isolation._computed[uuid] = computed;
+    isolation._computed[id] = computedInstance;
 
-    computed.on('get', function() {
-      isolation.registerDependency(uuid);
+    computedInstance.on('get', function() {
+      isolation.registerDependency(id);
     });
 
-    computed.on('start', function() {
-      isolation.setContext(uuid);
+    computedInstance.on('start', function() {
+      isolation.setContext(id);
     });
 
-    computed.on('end', function() {
+    computedInstance.on('end', function() {
       isolation.closeContext();
     });
 
-    computed.on('change', function() {
-      isolation.registerChanged(uuid);
+    computedInstance.on('change', function() {
+      isolation.registerChanged(id);
     });
 
     function _computed() {
       /*jshint validthis:true*/
 
-      return computed.get(this);
+      return computedInstance.get(this);
     }
 
     return _computed;
@@ -482,12 +648,12 @@ Zero.Isolation = (function() {
 
   prototype.registerSubscriber = function(subscriber) {
     var isolation = this;
-    var uuid = subscriber.uuid;
+    var id = subscriber.id;
 
-    isolation._subscribers[uuid] = subscriber;
+    isolation._subscribers[id] = subscriber;
 
     subscriber.on('start', function() {
-      isolation.setContext(uuid);
+      isolation.setContext(id);
     });
 
     subscriber.on('end', function() {
@@ -516,7 +682,7 @@ Zero.Isolation = (function() {
     function defferBinding() {
       /*jshint validthis:true*/
 
-      isolation.setContext(currentIsolationCallContext.uuid, true);
+      isolation.setContext(currentIsolationCallContext.id, true);
 
       var result = binding.call(context || this);
 
@@ -528,7 +694,7 @@ Zero.Isolation = (function() {
     return defferBinding;
   };
 
-  prototype.setContext = function(uuid, saveDependencies) {
+  prototype.setContext = function(id, saveDependencies) {
     var self = this;
     var currentContext = self._currentIsolationCallContext;
     var contexts = self._isolationCallContexts;
@@ -537,15 +703,15 @@ Zero.Isolation = (function() {
       self._callStack.unshift(currentContext);
     }
 
-    if (!contexts[uuid]) {
-      contexts[uuid] = new IsolationCallContext(uuid);
+    if (!contexts[id]) {
+      contexts[id] = new IsolationCallContext(id);
     }
 
-    currentContext = self._currentIsolationCallContext = contexts[uuid];
+    currentContext = self._currentIsolationCallContext = contexts[id];
 
     if (!saveDependencies) {
-      currentContext.dependencies.elements.forEach(function(calledUuid) {
-        self.removeRelation(uuid, calledUuid);
+      currentContext.dependencies.elements.forEach(function(calledId) {
+        self.removeRelation(id, calledId);
       });
 
       currentContext.dependencies.clear();
@@ -556,58 +722,58 @@ Zero.Isolation = (function() {
     this._currentIsolationCallContext = this._callStack.shift();
   };
 
-  prototype.registerDependency = function(uuid) {
+  prototype.registerDependency = function(id) {
     var currentContext = this._currentIsolationCallContext;
 
     if (currentContext) {
       /*#DEBUG*/
-      if (currentContext.relations.has(uuid)) {
+      if (currentContext.relations.has(id)) {
         throw new Error('Recoursive call');
       }
       /*/DEBUG*/
 
-      currentContext.dependencies.add(uuid);
-      this.registerRelation(currentContext.uuid, uuid);
+      currentContext.dependencies.add(id);
+      this.registerRelation(currentContext.id, id);
     }
   };
 
-  prototype.registerRelation = function(callerUuid, calledUuid) {
+  prototype.registerRelation = function(callerId, calledId) {
     var contexts = this._isolationCallContexts;
 
-    if (!contexts[calledUuid]) {
-      contexts[calledUuid] = new IsolationCallContext(calledUuid);
+    if (!contexts[calledId]) {
+      contexts[calledId] = new IsolationCallContext(calledId);
     }
 
     /*#DEBUG*/
-    if (contexts[calledUuid].dependencies.has(callerUuid)) {
+    if (contexts[calledId].dependencies.has(callerId)) {
       throw new Error('Recoursive call');
     }
     /*/DEBUG*/
 
-    contexts[calledUuid].relations.add(callerUuid);
+    contexts[calledId].relations.add(callerId);
   };
 
-  prototype.removeRelation = function(callerUuid, calledUuid) {
-    var context = this._isolationCallContexts[calledUuid];
+  prototype.removeRelation = function(callerId, calledId) {
+    var context = this._isolationCallContexts[calledId];
 
-    context.relations.remove(callerUuid);
+    context.relations.remove(callerId);
   };
 
-  prototype.registerChanged = function(uuid) {
+  prototype.registerChanged = function(id) {
     var self = this ;
-    var context = self._isolationCallContexts[uuid];
+    var context = self._isolationCallContexts[id];
     var relations;
 
     if (context) {
       relations = context.relations.elements;
 
       if (relations.length > 0) {
-        relations.forEach(function(uuid) {
-          if (!self._currentIsolationCallContext || self._currentIsolationCallContext.uuid !== uuid) {
-            if (self._computed[uuid]) {
-              self._computedToRecompute.add(uuid);
-            } else if (self._subscribers[uuid]) {
-              self._subscribersToRerun.add(uuid);
+        relations.forEach(function(id) {
+          if (!self._currentIsolationCallContext || self._currentIsolationCallContext.id !== id) {
+            if (self._computed[id]) {
+              self._computedToRecompute.add(id);
+            } else if (self._subscribers[id]) {
+              self._subscribersToRerun.add(id);
             }
           }
         });
@@ -619,17 +785,17 @@ Zero.Isolation = (function() {
 
   prototype.resolve = function() {
     var self = this;
-    var computedUuid;
-    var subscriberUuid;
+    var computedId;
+    var subscriberId;
 
     while (self._computedToRecompute.elements.length > 0) {
-      computedUuid = self._computedToRecompute.elements.shift();
-      self._computed[computedUuid].recompute();
+      computedId = self._computedToRecompute.elements.shift();
+      self._computed[computedId].recompute();
     }
 
     while (self._subscribersToRerun.elements.length > 0) {
-      subscriberUuid = self._subscribersToRerun.elements.shift();
-      self._subscribers[subscriberUuid].rerun();
+      subscriberId = self._subscribersToRerun.elements.shift();
+      self._subscribers[subscriberId].rerun();
     }
   };
 

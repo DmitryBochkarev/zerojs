@@ -13,7 +13,7 @@ Zero.Observable = (function() {
 
     EventEmitter.call(self);
 
-    self.uuid = Zero.uuid();
+    self.id = Zero.id();
     self.value = initialValue;
   }
 

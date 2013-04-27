@@ -1,11 +1,10 @@
 /*#DEBUG*/
 
 if (!window.Zero) {
-  /** @global */
   window.Zero = {};
 }
 
-Zero.DEBUG = {};
+window.Zero.DEBUG = {};
 
 ['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'].forEach(function(name) {
   "use strict";
@@ -19,15 +18,15 @@ Zero.DEBUG = {};
 /**
  * Does nothing just return passing value
  * @param {*} [value]
- * @returns value
+ * @returns passed value
  */
 Zero.noop = function(value) { return value; };
 
 /**
  * Generate unique number
- * @returns {Integer} uuid
+ * @returns {Integer} id
  */
-Zero.uuid = (function() {
+Zero.id = (function() {
   "use strict";
 
   var i = 1;
@@ -47,7 +46,7 @@ Zero.uuid = (function() {
  * Return function that deffer execution by wait time
  * @param {Milliseconds} wait
  * @param {Function} fn
- * @returns {Function}
+ * @returns {Function} deffered function
  */
 Zero.deferred = function(wait, fn) {
   "use strict";

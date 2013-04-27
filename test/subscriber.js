@@ -17,11 +17,11 @@ describe('Zero.Subscriber', function() {
     expect(subscriber).to.be.an.instanceof(Zero.EventEmitter);
   });
 
-  it('should have unique uuid', function() {
+  it('should have unique id', function() {
     var subscriber1 = new Zero.Subscriber(Zero.noop);
     var subscriber2 = new Zero.Subscriber(Zero.noop);
 
-    expect(subscriber1.uuid).to.not.be.equal(subscriber2.uuid);
+    expect(subscriber1.id).to.not.be.equal(subscriber2.id);
   });
 
   it('should emit `start` event on run', function() {

@@ -17,11 +17,11 @@ describe('Zero.Computed', function() {
     expect(computed).to.be.an.instanceof(Zero.EventEmitter);
   });
 
-  it('should have unique uuid', function() {
+  it('should have unique id', function() {
     var c1 = new Zero.Computed(Zero.noop);
     var c2 = new Zero.Computed(Zero.noop);
 
-    expect(c1.uuid).to.not.be.equal(c2.uuid);
+    expect(c1.id).to.not.be.equal(c2.id);
   });
 
   it('should emit computeFn on first call', function() {

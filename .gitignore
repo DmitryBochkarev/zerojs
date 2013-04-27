@@ -1,5 +1,6 @@
 .idea
 *.iml
+.tern-port
 /node_modules
 /src-cov
 coverage.html

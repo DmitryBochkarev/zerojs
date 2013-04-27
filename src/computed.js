@@ -19,7 +19,7 @@ Zero.Computed = (function() {
 
     EventEmitter.call(self);
 
-    self.uuid = Zero.uuid();
+    self.id = Zero.id();
     self._computeFn = computeFn;
     self.value = undefined;
     self._shouldRecompute = true;
