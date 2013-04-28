@@ -60,7 +60,8 @@ Zero.Computed = (function() {
 
   /**
    * Force to recompute return computed value.
-   * @returns {*} value
+   * @lends Computed.prototype
+   * @returns {*} recomputed value
    */
   prototype.recompute = function() {
     this._shouldRecompute = true;

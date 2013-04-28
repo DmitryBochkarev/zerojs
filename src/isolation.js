@@ -122,12 +122,24 @@ Zero.Isolation = (function() {
     return _computed;
   };
 
+  /**
+   * Create and register Subscriber
+   * @lends Isolation.prototype
+   * @param {Function} subscribeFn
+   * @returns {Subscriber} new subscriber instance
+   */
   prototype.subscribe = function(subscribeFn) {
     var subscriber = new Zero.Subscriber(subscribeFn);
 
     return this.registerSubscriber(subscriber);
   };
 
+  /**
+   * Register Subscriber
+   * @lends Isolation.prototype
+   * @param {Subscriber} subscribeFn
+   * @returns {Function} subscriber
+   */
   prototype.registerSubscriber = function(subscriber) {
     var isolation = this;
     var id = subscriber.id;
@@ -151,6 +163,13 @@ Zero.Isolation = (function() {
     return _subscriber;
   };
 
+  /**
+   * Bind computed/subscriber to current isolation context for later async usage
+   * @lends Isolation.prototype
+   * @param {Computed|Subscriber} binding
+   * @param {Object} [context]
+   * @return {Computed|Subscriber} deferedBinding
+   */
   prototype.deffer = function(binding, context) {
     /*#DEBUG*/
     if (!Zero.DEBUG.isFunction(binding)) {
@@ -176,6 +195,12 @@ Zero.Isolation = (function() {
     return defferBinding;
   };
 
+  /**
+   * Mark enter in isolation call context
+   * @lends Isolation.prototype
+   * @param {Integer} id of isolation call context
+   * @param {Boolean} [saveDependencies=false]
+   */
   prototype.setContext = function(id, saveDependencies) {
     var self = this;
     var currentContext = self._currentIsolationCallContext;
@@ -200,10 +225,19 @@ Zero.Isolation = (function() {
     }
   };
 
+  /**
+   * Close last opened isolation call context in call stack
+   * @lends Isolation.prototype
+   */
   prototype.closeContext = function() {
     this._currentIsolationCallContext = this._callStack.shift();
   };
 
+  /**
+   * Register dependency to current isolation call context
+   * @lends Isolation.prototype
+   * @param {Integer} dependency id
+   */ 
   prototype.registerDependency = function(id) {
     var currentContext = this._currentIsolationCallContext;
 
